@@ -57,6 +57,56 @@ $ yarn run test:e2e
 $ yarn run test:cov
 ```
 
+## Database Migrations
+
+This project uses Prisma 7 with Clean Architecture. Entities are in `src/domain/entities/` and migrations are stored in `src/infrastructure/migrations/`.
+
+### Setup
+
+1. Copy `.env.example` to `.env` and configure your `DATABASE_URL`:
+```bash
+$ cp .env.example .env
+```
+
+2. Generate Prisma Client:
+```bash
+$ yarn prisma:generate
+```
+
+### Creating Migrations
+
+When you make changes to your schema files in `src/domain/entities/*.prisma`:
+
+```bash
+# Create and apply migration to development database
+$ yarn prisma:migrate:create <migration_name>
+
+# Example
+$ yarn prisma:migrate:create add_user_table
+```
+
+This will:
+- Create a migration file in `src/infrastructure/migrations/`
+- Apply the migration to your development database immediately
+
+### Deploying Migrations
+
+For production/staging environments:
+
+```bash
+# Apply all pending migrations
+$ yarn prisma:migrate:deploy
+```
+
+This is safer for production as it only applies existing migrations without creating new ones.
+
+### Other Prisma Commands
+
+```bash
+# Regenerate Prisma Client after schema changes
+$ yarn prisma:generate
+```
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.

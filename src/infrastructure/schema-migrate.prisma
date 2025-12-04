@@ -1,0 +1,14 @@
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isActive  Boolean  @default(true)
+
+  @@map("users")
+}
