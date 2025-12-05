@@ -44,6 +44,22 @@ $ yarn run start:dev
 $ yarn run start:prod
 ```
 
+## API Documentation
+
+This project uses Swagger/OpenAPI for API documentation. Once the application is running, you can access the interactive API documentation at:
+
+```
+http://localhost:3000/api/docs
+```
+
+The Swagger UI provides:
+- Interactive API testing interface
+- Request/Response schemas
+- Authentication details
+- Example requests and responses
+
+To customize the API documentation, edit the Swagger configuration in `src/main.ts`.
+
 ## Run tests
 
 ```bash
