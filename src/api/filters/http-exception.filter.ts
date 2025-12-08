@@ -7,9 +7,12 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { DomainException, EntityNotFoundException, EntityAlreadyExistsException } from '../../domain/exceptions/domain.exception';
-import { BusinessException } from '../../common/exceptions/business.exception';
-
+import {
+  DomainException,
+  EntityNotFoundException,
+  EntityAlreadyExistsException,
+} from '@domain/exceptions/domain.exception';
+import { BusinessException } from '@common/exceptions/business.exception';
 
 interface ErrorResponse {
   statusCode: number;
@@ -19,7 +22,6 @@ interface ErrorResponse {
   error: string;
   details?: any;
 }
-
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -32,7 +34,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     const errorResponse = this.buildErrorResponse(exception, request);
 
-
     this.logger.error(
       `${request.method} ${request.url}`,
       JSON.stringify(errorResponse),
@@ -41,7 +42,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
     response.status(errorResponse.statusCode).json(errorResponse);
   }
 
-
   private buildErrorResponse(
     exception: unknown,
     request: Request,
@@ -49,23 +49,23 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const timestamp = new Date().toISOString();
     const path = request.url;
 
-
     if (exception instanceof HttpException) {
       const status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
-      
+
       return {
         statusCode: status,
         timestamp,
         path,
-        message: typeof exceptionResponse === 'string' 
-          ? exceptionResponse 
-          : (exceptionResponse as any).message || exception.message,
+        message:
+          typeof exceptionResponse === 'string'
+            ? exceptionResponse
+            : (exceptionResponse as any).message || exception.message,
         error: exception.name,
-        details: typeof exceptionResponse === 'object' ? exceptionResponse : undefined,
+        details:
+          typeof exceptionResponse === 'object' ? exceptionResponse : undefined,
       };
     }
-
 
     if (exception instanceof EntityNotFoundException) {
       return {
@@ -97,7 +97,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
       };
     }
 
-
     if (exception instanceof BusinessException) {
       return {
         statusCode: exception.statusCode,
@@ -108,7 +107,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
       };
     }
 
-
     if (exception instanceof Error) {
       return {
         statusCode: HttpStatus.BAD_REQUEST,
@@ -118,7 +116,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
         error: exception.name,
       };
     }
-
 
     return {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
