@@ -1,17 +1,190 @@
+// ============================================
+// base.prisma
+// ============================================
+
 datasource db {
   provider = "postgresql"
 }
 
-
 generator client {
   provider = "prisma-client-js"
 }
+
+
+
+// ============================================
+// user.prisma
+// ============================================
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
+  fullName  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   isActive  Boolean  @default(true)
 
+  integrationAccounts IntegrationAccount[]
+
   @@map("users")
 }
+
+
+
+// ============================================
+// integration.prisma
+// ============================================
+
+// Registry of supported integrations (global configuration)
+model Integration {
+  id              String   @id @default(uuid())
+  slug            String   @unique // e.g., 'google-people', 'google-calendar', 'google-gmail'
+  name            String   // e.g., 'Google Contacts'
+  provider        String   // 'google', 'microsoft', 'apple'
+  isGlobalEnabled Boolean  @default(true)
+  authBaseUrl     String?
+  tokenUrl        String?
+  requiredScopes  String[] // Array of scopes needed
+  createdAt       DateTime @default(now())
+
+  integrationAccounts IntegrationAccount[]
+
+  @@map("integrations")
+}
+
+// Links a User to an Integration - holds encrypted credentials
+model IntegrationAccount {
+  id                String   @id @default(uuid())
+  userId            String
+  integrationId     String
+  // Identity Data (The "Who")
+  remoteProviderId  String   // Google's 'sub' or immutable user ID
+  remoteEmail       String?  // The email of the connected account
+  // Security Credentials (The "Keys") - stored as encrypted strings
+  accessTokenEnc    String   // Encrypted access token (AES-256-GCM)
+  refreshTokenEnc   String   // Encrypted refresh token
+  // Lifecycle Management
+  tokenExpiresAt    DateTime
+  scopesGranted     String[] // The actual scopes granted by the user
+  // Connection Health
+  status            String   @default("active") // 'active', 'disconnected', 'expired_token', 'needs_reauth'
+  lastErrorMessage  String?
+  disconnectReason  String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  integration Integration  @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  syncStates  SyncState[]
+  syncLogs   SyncLog[]
+  contacts   Contact[]
+
+  @@unique([userId, integrationId, remoteProviderId])
+  @@index([status])
+  @@map("integration_accounts")
+}
+
+
+
+// ============================================
+// sync.prisma
+// ============================================
+
+// Tracks synchronization progress (the "Anchor State")
+model SyncState {
+  id                  String   @id @default(uuid())
+  integrationAccountId String
+  // Resource Partitioning
+  resourceType        String   // 'contacts', 'calendar_events', 'gmail_messages'
+  resourceId          String   @default("default") // 'people/me' or a specific Calendar ID
+  // The Anchors (Polymorphic Token Storage)
+  syncToken           String?  // Google People & Calendar use 'sync_token'
+  historyId           String?  // Gmail uses 'history_id' (integer-like string)
+  // Transient Pagination State (Crash Recovery)
+  currentPageToken    String?  // Stores the 'nextPageToken' if job is mid-flight
+  // Sync Metadata
+  lastSyncedAt        DateTime?
+  lastSuccessAt       DateTime?
+  lastAttemptStatus   String   @default("pending") // 'success', 'failed', 'partial'
+  // Logical Flags
+  fullSyncRequired    Boolean  @default(false) // Force a full re-sync (e.g., after 410 error)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  integrationAccount IntegrationAccount @relation(fields: [integrationAccountId], references: [id], onDelete: Cascade)
+
+  syncLogs SyncLog[]
+
+  @@unique([integrationAccountId, resourceType, resourceId])
+  @@index([integrationAccountId])
+  @@index([resourceType])
+  @@map("sync_states")
+}
+
+// Operational logging for sync processes
+model SyncLog {
+  id                  String   @id @default(uuid())
+  integrationAccountId String?
+  syncStateId        String?
+  // Execution Timing
+  startTime          DateTime  @default(now())
+  endTime            DateTime?
+  durationMs         Int?
+  // Outcome
+  status             String    // 'running', 'completed', 'failed', 'cancelled'
+  triggerSource      String?   // 'cron', 'webhook', 'manual'
+  // Metrics (Data Volume)
+  itemsFetched       Int       @default(0)
+  itemsUpserted      Int       @default(0)
+  itemsDeleted       Int       @default(0)
+  // Diagnostics
+  errorCode          String?   // e.g., '410', '401', 'RATE_LIMIT_EXCEEDED'
+  errorMessage       String?
+  stackTrace         String?
+  // Context
+  meta               Json      @default("{}")
+
+  integrationAccount IntegrationAccount? @relation(fields: [integrationAccountId], references: [id], onDelete: SetNull)
+  syncState          SyncState?          @relation(fields: [syncStateId], references: [id], onDelete: SetNull)
+
+  @@index([syncStateId, startTime(sort: Desc)])
+  @@index([integrationAccountId])
+  @@map("sync_logs")
+}
+
+
+
+// ============================================
+// contact.prisma
+// ============================================
+
+model Contact {
+  id                String   @id @default(uuid())
+  integrationAccountId String
+  googleResourceName String?  @unique // e.g., 'people/c12345'
+  firstName         String?
+  lastName          String?
+  displayName       String?
+  email             String?
+  phoneNumber       String?
+  organization      String?
+  jobTitle          String?
+  notes             String?
+  photoUrl          String?
+  isDeleted         Boolean   @default(false) // Soft delete
+  syncedAt          DateTime  @default(now())
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  integrationAccount IntegrationAccount @relation(fields: [integrationAccountId], references: [id], onDelete: Cascade)
+
+  @@index([integrationAccountId])
+  @@index([googleResourceName])
+  @@index([email])
+  @@index([isDeleted])
+  @@map("contacts")
+}
+
+
+

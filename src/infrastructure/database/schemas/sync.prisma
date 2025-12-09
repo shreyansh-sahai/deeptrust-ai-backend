@@ -1,0 +1,62 @@
+// Tracks synchronization progress (the "Anchor State")
+model SyncState {
+  id                  String   @id @default(uuid())
+  integrationAccountId String
+  // Resource Partitioning
+  resourceType        String   // 'contacts', 'calendar_events', 'gmail_messages'
+  resourceId          String   @default("default") // 'people/me' or a specific Calendar ID
+  // The Anchors (Polymorphic Token Storage)
+  syncToken           String?  // Google People & Calendar use 'sync_token'
+  historyId           String?  // Gmail uses 'history_id' (integer-like string)
+  // Transient Pagination State (Crash Recovery)
+  currentPageToken    String?  // Stores the 'nextPageToken' if job is mid-flight
+  // Sync Metadata
+  lastSyncedAt        DateTime?
+  lastSuccessAt       DateTime?
+  lastAttemptStatus   String   @default("pending") // 'success', 'failed', 'partial'
+  // Logical Flags
+  fullSyncRequired    Boolean  @default(false) // Force a full re-sync (e.g., after 410 error)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  integrationAccount IntegrationAccount @relation(fields: [integrationAccountId], references: [id], onDelete: Cascade)
+
+  syncLogs SyncLog[]
+
+  @@unique([integrationAccountId, resourceType, resourceId])
+  @@index([integrationAccountId])
+  @@index([resourceType])
+  @@map("sync_states")
+}
+
+// Operational logging for sync processes
+model SyncLog {
+  id                  String   @id @default(uuid())
+  integrationAccountId String?
+  syncStateId        String?
+  // Execution Timing
+  startTime          DateTime  @default(now())
+  endTime            DateTime?
+  durationMs         Int?
+  // Outcome
+  status             String    // 'running', 'completed', 'failed', 'cancelled'
+  triggerSource      String?   // 'cron', 'webhook', 'manual'
+  // Metrics (Data Volume)
+  itemsFetched       Int       @default(0)
+  itemsUpserted      Int       @default(0)
+  itemsDeleted       Int       @default(0)
+  // Diagnostics
+  errorCode          String?   // e.g., '410', '401', 'RATE_LIMIT_EXCEEDED'
+  errorMessage       String?
+  stackTrace         String?
+  // Context
+  meta               Json      @default("{}")
+
+  integrationAccount IntegrationAccount? @relation(fields: [integrationAccountId], references: [id], onDelete: SetNull)
+  syncState          SyncState?          @relation(fields: [syncStateId], references: [id], onDelete: SetNull)
+
+  @@index([syncStateId, startTime(sort: Desc)])
+  @@index([integrationAccountId])
+  @@map("sync_logs")
+}
+
