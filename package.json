@@ -18,7 +18,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "prisma:merge": "cat src/infrastructure/database/datasource.prisma src/infrastructure/database/base.prisma src/domain/entities/*.prisma > src/infrastructure/schema.prisma",
+    "prisma:merge": "node src/infrastructure/database/combine-schemas.js",
     "prisma:generate": "yarn prisma:merge && prisma generate",
     "prisma:migrate:create": "yarn prisma:merge && prisma migrate dev --name",
     "prisma:migrate:deploy": "yarn prisma:merge && prisma migrate deploy"
@@ -34,7 +34,8 @@
     "dotenv": "^17.2.3",
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "@prisma/client": "^7.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
