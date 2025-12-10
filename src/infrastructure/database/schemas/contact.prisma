@@ -1,0 +1,27 @@
+model Contact {
+  id                String   @id @default(uuid())
+  integrationAccountId String
+  googleResourceName String?  @unique // e.g., 'people/c12345'
+  firstName         String?
+  lastName          String?
+  displayName       String?
+  email             String?
+  phoneNumber       String?
+  organization      String?
+  jobTitle          String?
+  notes             String?
+  photoUrl          String?
+  isDeleted         Boolean   @default(false) // Soft delete
+  syncedAt          DateTime  @default(now())
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  integrationAccount IntegrationAccount @relation(fields: [integrationAccountId], references: [id], onDelete: Cascade)
+
+  @@index([integrationAccountId])
+  @@index([googleResourceName])
+  @@index([email])
+  @@index([isDeleted])
+  @@map("contacts")
+}
+
