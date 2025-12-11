@@ -43,6 +43,7 @@ model IntegrationAccount {
   syncLogs   SyncLog[]
   contacts   Contact[]
   emails     Email[]
+  calendarEvents CalendarEvent[]
 
   @@unique([userId, integrationId, remoteProviderId])
   @@index([status])
