@@ -1,0 +1,38 @@
+model Email {
+  id                String   @id @default(uuid())
+  integrationAccountId String
+  gmailMessageId   String   @unique // Gmail message ID (e.g., '18c5f1a2b3c4d5e6')
+  threadId         String   // Gmail thread ID
+  // Message Headers
+  subject          String?
+  fromEmail        String?  // From email address
+  fromName         String?  // From display name
+  toEmails         String[] // Array of 'to' email addresses
+  ccEmails         String[] // Array of 'cc' email addresses
+  bccEmails        String[] // Array of 'bcc' email addresses
+  replyTo          String?  // Reply-To header
+  // Message Content
+  snippet          String?  // Preview text (first ~100 chars)
+  bodyText         String?  // Plain text body
+  bodyHtml         String?  // HTML body (can be large)
+  // Metadata
+  labels           String[] // Gmail labels (INBOX, SENT, etc.)
+  internalDate     DateTime? // Gmail internal date (when message was received)
+  receivedDate     DateTime? // Parsed received date from headers
+  sizeEstimate     Int?     // Message size in bytes
+  // Sync & Lifecycle
+  isDeleted        Boolean  @default(false) // Soft delete
+  syncedAt         DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  integrationAccount IntegrationAccount @relation(fields: [integrationAccountId], references: [id], onDelete: Cascade)
+
+  @@index([integrationAccountId])
+  @@index([gmailMessageId])
+  @@index([threadId])
+  @@index([isDeleted])
+  @@index([internalDate])
+  @@map("emails")
+}
+

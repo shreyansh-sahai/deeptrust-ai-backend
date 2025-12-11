@@ -18,6 +18,7 @@ const schemaFiles = [
   'integration.prisma',
   'sync.prisma',
   'contact.prisma',
+  'email.prisma',
 ];
 
 let combinedContent = '';
