@@ -14,4 +14,18 @@ export class Config {
   static get databaseUrl(): string {
     return this.get('DATABASE_URL');
   }
+
+  static get COGNITO_CLIENT_ID(): string {
+    return this.get('COGNITO_CLIENT_ID');
+  }
+
+  static get COGNITO_CLIENT_SECRET(): string {
+    return this.get('COGNITO_CLIENT_SECRET');
+  }
+  static get COGNITO_DOMAIN(): string {
+    return this.get('COGNITO_DOMAIN');
+  }
+  static get COGNITO_REDIRECT_URI(): string {
+    return this.get('COGNITO_REDIRECT_URI');
+  }
 }
