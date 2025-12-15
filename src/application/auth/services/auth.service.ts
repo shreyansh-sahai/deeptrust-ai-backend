@@ -1,10 +1,11 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import axios from 'axios';
 import { Config } from '@common/util/config';
 import { JwtUtil } from '@common/util/jwt.util';
 import { UserRepository } from '@infrastructure/repositories/user.repository';
 import { IntegrationRepository } from '@infrastructure/repositories/integration.repository';
-import { IntegrationAccountRepository } from '@infrastructure/repositories/integration-account.repository';
+// import { IntegrationAccountRepository } from '@infrastructure/repositories/integration-account.repository';
 
 @Injectable()
 export class AuthService {
@@ -16,8 +17,9 @@ export class AuthService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly integrationRepository: IntegrationRepository,
-    private readonly integrationAccountRepository: IntegrationAccountRepository,
-  ) {}
+    // private readonly integrationAccountRepository: IntegrationAccountRepository,
+    private readonly jwtService: JwtService,
+  ) { }
 
   async exchangeCodeForTokens(code: string, provider: string) {
     const tokenUrl = `${this.domain}/oauth2/token`;
@@ -27,6 +29,7 @@ export class AuthService {
     data.append('client_id', this.clientId || '');
     data.append('redirect_uri', this.redirectUri || '');
     data.append('code', code);
+
 
     try {
       const response = await axios.post(tokenUrl, data.toString(), {
@@ -38,7 +41,8 @@ export class AuthService {
       const { access_token, refresh_token, expires_in, id_token } =
         response.data;
 
-      // const userInfo = JwtUtil.decodeIdToken(id_token);
+      const userInfo = JwtUtil.decodeIdToken(id_token);
+      console.log('userInfo', userInfo);
       // const tokenExpiry = JwtUtil.calculateTokenExpiry(expires_in);
 
       //let user = await this.userRepository.findByEmail(userInfo.email);
@@ -65,12 +69,20 @@ export class AuthService {
       //   );
       // }
 
-      return {
-        access_token,
-        refresh_token,
-        id_token,
-        expires_in
-      };
+      // return {
+      //   access_token,
+      //   refresh_token,
+      //   id_token,
+      //   expires_in
+      // };
+      var sessionToken = await this.createSessionToken({
+        sub: userInfo.email,
+        email: userInfo.email,
+        provider: 'cognito',
+      });
+
+      return { token: sessionToken };
+
     } catch (err: any) {
       console.error('Token exchange error:', err.response?.data || err.message);
       const errorMessage =
@@ -128,7 +140,7 @@ export class AuthService {
     //     scopesGranted: integration.requiredScopes,
     //   });
     // }
-    
+
   }
 
   private async handleNewUser(
@@ -165,5 +177,16 @@ export class AuthService {
     // });
 
     // return user;
+  }
+
+  private async createSessionToken(payload: {
+    sub: string;
+    email?: string;
+    provider: string;
+  }) {
+    return this.jwtService.sign(payload, {
+      secret: 'sJpPXkD+5fLJfph1z0yCqQmTsk+3e0A2tZT90pJ1mU0=',
+      expiresIn: '1d'
+    });
   }
 }

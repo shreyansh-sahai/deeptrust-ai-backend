@@ -24,7 +24,7 @@ export class SyncService {
   private readonly logger = new Logger(SyncService.name);
   private readonly runningSyncs = new Map<string, Subject<SyncProgressEvent>>();
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   /**
    * Start a sync operation and return an Observable stream of progress events
@@ -195,31 +195,31 @@ export class SyncService {
     return {
       syncState: syncState
         ? {
-            id: syncState.id,
-            resourceType: syncState.resourceType,
-            resourceId: syncState.resourceId,
-            syncToken: syncState.syncToken,
-            historyId: syncState.historyId,
-            currentPageToken: syncState.currentPageToken,
-            lastSyncedAt: syncState.lastSyncedAt,
-            lastSuccessAt: syncState.lastSuccessAt,
-            lastAttemptStatus: syncState.lastAttemptStatus,
-            fullSyncRequired: syncState.fullSyncRequired,
-          }
+          id: syncState.id,
+          resourceType: syncState.resourceType,
+          resourceId: syncState.resourceId,
+          syncToken: syncState.syncToken,
+          historyId: syncState.historyId,
+          currentPageToken: syncState.currentPageToken,
+          lastSyncedAt: syncState.lastSyncedAt,
+          lastSuccessAt: syncState.lastSuccessAt,
+          lastAttemptStatus: syncState.lastAttemptStatus,
+          fullSyncRequired: syncState.fullSyncRequired,
+        }
         : null,
       lastSyncLog: lastSyncLog
         ? {
-            id: lastSyncLog.id,
-            status: lastSyncLog.status,
-            startTime: lastSyncLog.startTime,
-            endTime: lastSyncLog.endTime,
-            durationMs: lastSyncLog.durationMs,
-            itemsFetched: lastSyncLog.itemsFetched,
-            itemsUpserted: lastSyncLog.itemsUpserted,
-            itemsDeleted: lastSyncLog.itemsDeleted,
-            errorCode: lastSyncLog.errorCode,
-            errorMessage: lastSyncLog.errorMessage,
-          }
+          id: lastSyncLog.id,
+          status: lastSyncLog.status,
+          startTime: lastSyncLog.startTime,
+          endTime: lastSyncLog.endTime,
+          durationMs: lastSyncLog.durationMs,
+          itemsFetched: lastSyncLog.itemsFetched,
+          itemsUpserted: lastSyncLog.itemsUpserted,
+          itemsDeleted: lastSyncLog.itemsDeleted,
+          errorCode: lastSyncLog.errorCode,
+          errorMessage: lastSyncLog.errorMessage,
+        }
         : null,
       isRunning,
     };
