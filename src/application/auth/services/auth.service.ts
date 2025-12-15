@@ -38,40 +38,38 @@ export class AuthService {
       const { access_token, refresh_token, expires_in, id_token } =
         response.data;
 
-      const userInfo = JwtUtil.decodeIdToken(id_token);
-      const tokenExpiry = JwtUtil.calculateTokenExpiry(expires_in);
+      // const userInfo = JwtUtil.decodeIdToken(id_token);
+      // const tokenExpiry = JwtUtil.calculateTokenExpiry(expires_in);
 
-      let user = await this.userRepository.findByEmail(userInfo.email);
+      //let user = await this.userRepository.findByEmail(userInfo.email);
 
-      if (user) {
-        await this.handleExistingUser(
-          user.id,
-          provider,
-          userInfo.sub,
-          userInfo.email,
-          access_token,
-          refresh_token,
-          tokenExpiry,
-        );
-      } else {
-        user = await this.handleNewUser(
-          userInfo.email,
-          userInfo.name,
-          provider,
-          userInfo.sub,
-          access_token,
-          refresh_token,
-          tokenExpiry,
-        );
-      }
+      // if (user) {
+      //   await this.handleExistingUser(
+      //     user.id,
+      //     provider,
+      //     userInfo.sub,
+      //     userInfo.email,
+      //     access_token,
+      //     refresh_token,
+      //     tokenExpiry,
+      //   );
+      // } else {
+      //   user = await this.handleNewUser(
+      //     userInfo.email,
+      //     userInfo.name,
+      //     provider,
+      //     userInfo.sub,
+      //     access_token,
+      //     refresh_token,
+      //     tokenExpiry,
+      //   );
+      // }
 
       return {
         access_token,
         refresh_token,
         id_token,
-        expires_in,
-        userId: user.id,
-        email: user.email,
+        expires_in
       };
     } catch (err: any) {
       console.error('Token exchange error:', err.response?.data || err.message);
@@ -93,43 +91,44 @@ export class AuthService {
     refreshToken: string,
     tokenExpiry: Date,
   ): Promise<void> {
-    const integration = await this.integrationRepository.findByProvider(
-      provider,
-    );
+    // const integration = await this.integrationRepository.findByProvider(
+    //   provider,
+    // );
 
-    if (!integration) {
-      throw new HttpException(
-        `Integration not found for provider: ${provider}`,
-        HttpStatus.NOT_FOUND,
-      );
-    }
+    // if (!integration) {
+    //   throw new HttpException(
+    //     `Integration not found for provider: ${provider}`,
+    //     HttpStatus.NOT_FOUND,
+    //   );
+    // }
 
-    const existingAccount =
-      await this.integrationAccountRepository.findByUserAndIntegration(
-        userId,
-        integration.id,
-      );
+    // const existingAccount =
+    //   await this.integrationAccountRepository.findByUserAndIntegration(
+    //     userId,
+    //     integration.id,
+    //   );
 
-    if (existingAccount) {
-      await this.integrationAccountRepository.update(existingAccount.id, {
-        accessTokenEnc: accessToken,
-        refreshTokenEnc: refreshToken,
-        tokenExpiresAt: tokenExpiry,
-        remoteEmail,
-        status: 'active',
-      });
-    } else {
-      await this.integrationAccountRepository.create({
-        userId,
-        integrationId: integration.id,
-        remoteProviderId,
-        remoteEmail,
-        accessTokenEnc: accessToken,
-        refreshTokenEnc: refreshToken,
-        tokenExpiresAt: tokenExpiry,
-        scopesGranted: integration.requiredScopes,
-      });
-    }
+    // if (existingAccount) {
+    //   await this.integrationAccountRepository.update(existingAccount.id, {
+    //     accessTokenEnc: accessToken,
+    //     refreshTokenEnc: refreshToken,
+    //     tokenExpiresAt: tokenExpiry,
+    //     remoteEmail,
+    //     status: 'active',
+    //   });
+    // } else {
+    //   await this.integrationAccountRepository.create({
+    //     userId,
+    //     integrationId: integration.id,
+    //     remoteProviderId,
+    //     remoteEmail,
+    //     accessTokenEnc: accessToken,
+    //     refreshTokenEnc: refreshToken,
+    //     tokenExpiresAt: tokenExpiry,
+    //     scopesGranted: integration.requiredScopes,
+    //   });
+    // }
+    
   }
 
   private async handleNewUser(
@@ -141,30 +140,30 @@ export class AuthService {
     refreshToken: string,
     tokenExpiry: Date,
   ) {
-    const user = await this.userRepository.create(email, fullName);
+    // const user = await this.userRepository.create(email, fullName);
 
-    const integration = await this.integrationRepository.findByProvider(
-      provider,
-    );
+    // const integration = await this.integrationRepository.findByProvider(
+    //   provider,
+    // );
 
-    if (!integration) {
-      throw new HttpException(
-        `Integration not found for provider: ${provider}`,
-        HttpStatus.NOT_FOUND,
-      );
-    }
+    // if (!integration) {
+    //   throw new HttpException(
+    //     `Integration not found for provider: ${provider}`,
+    //     HttpStatus.NOT_FOUND,
+    //   );
+    // }
 
-    await this.integrationAccountRepository.create({
-      userId: user.id,
-      integrationId: integration.id,
-      remoteProviderId,
-      remoteEmail: email,
-      accessTokenEnc: accessToken,
-      refreshTokenEnc: refreshToken,
-      tokenExpiresAt: tokenExpiry,
-      scopesGranted: integration.requiredScopes,
-    });
+    // await this.integrationAccountRepository.create({
+    //   userId: user.id,
+    //   integrationId: integration.id,
+    //   remoteProviderId,
+    //   remoteEmail: email,
+    //   accessTokenEnc: accessToken,
+    //   refreshTokenEnc: refreshToken,
+    //   tokenExpiresAt: tokenExpiry,
+    //   scopesGranted: integration.requiredScopes,
+    // });
 
-    return user;
+    // return user;
   }
 }

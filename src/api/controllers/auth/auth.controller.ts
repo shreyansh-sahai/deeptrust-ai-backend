@@ -8,7 +8,7 @@ import {
 import { Response } from 'express';
 import { AuthService } from '@application/auth/services/auth.service';
 
-@Controller('api/v1/auth')
+@Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
