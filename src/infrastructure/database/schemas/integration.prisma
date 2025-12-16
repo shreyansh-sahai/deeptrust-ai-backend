@@ -41,7 +41,7 @@ model IntegrationAccount {
 
   syncStates  SyncState[]
   syncLogs   SyncLog[]
-  contacts   Contact[]
+  integrationAccountContacts IntegrationAccountContact[]
   emails     Email[]
   calendarEvents CalendarEvent[]
 
