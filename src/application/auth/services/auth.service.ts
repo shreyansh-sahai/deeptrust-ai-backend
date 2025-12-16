@@ -31,8 +31,7 @@ export class AuthService {
     data.append('code', code);
 
 
-    if (!provider)
-      provider = 'cognito';
+
 
     try {
       const response = await axios.post(tokenUrl, data.toString(), {
@@ -44,8 +43,12 @@ export class AuthService {
       const { access_token, refresh_token, expires_in, id_token } =
         response.data;
 
+      console.log('id_token', id_token);
+
       const userInfo = JwtUtil.decodeIdToken(id_token);
       console.log('userInfo', userInfo);
+      if (!provider)
+        provider = userInfo.provider;
       const tokenExpiry = JwtUtil.calculateTokenExpiry(expires_in);
 
       let user = await this.userRepository.findByEmail(userInfo.email);
