@@ -1,4 +1,5 @@
-model Contact {
+// Sync table: All contacts from integration accounts (can have duplicates)
+model IntegrationAccountContact {
   id                String   @id @default(uuid())
   integrationAccountId String
   googleResourceName String?  @unique // e.g., 'people/c12345'
@@ -22,6 +23,46 @@ model Contact {
   @@index([googleResourceName])
   @@index([email])
   @@index([isDeleted])
+  @@map("integration_accounts_contacts")
+}
+
+// Unique contacts table: Deduplicated contacts, unique by email
+model Contact {
+  id                String   @id @default(uuid())
+  email             String   @unique // Unique constraint on email
+  firstName         String?
+  lastName          String?
+  displayName       String?
+  phoneNumber       String?
+  organization      String?
+  jobTitle          String?
+  notes             String?
+  photoUrl          String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  userContacts      UserContact[]
+
+  @@index([email])
   @@map("contacts")
 }
 
+// Many-to-many relationship between User and Contact
+model UserContact {
+  id                String   @id @default(uuid())
+  userId            String
+  contactId         String
+  metadata          Json?    // JSONB in PostgreSQL
+  buckets           String[] // Array of bucket names
+  featureTags       String[] // Array of feature tags
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contact           Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, contactId])
+  @@index([userId])
+  @@index([contactId])
+  @@map("user_contacts")
+}

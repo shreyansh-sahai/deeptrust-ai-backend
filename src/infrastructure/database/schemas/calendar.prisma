@@ -1,0 +1,51 @@
+model CalendarEvent {
+  id                String   @id @default(uuid())
+  integrationAccountId String
+  googleEventId     String   // Google Calendar event ID
+  calendarId        String   // Calendar ID (e.g., 'primary', or specific calendar ID)
+  // Event Identity
+  iCalUID           String?  // iCal UID (for cross-calendar deduplication)
+  recurringEventId  String?  // For recurring events, links to master event
+  // Event Details
+  summary           String?  // Event title
+  description       String?  // Event description
+  location          String?  // Event location
+  // Timing
+  startDateTime     DateTime? // Start time (for date-time events)
+  startDate         String?   // Start date (for all-day events, ISO format: YYYY-MM-DD)
+  endDateTime       DateTime? // End time (for date-time events)
+  endDate           String?   // End date (for all-day events, ISO format: YYYY-MM-DD)
+  isAllDay          Boolean  @default(false) // Whether event is all-day
+  timeZone          String?  // Timezone (e.g., 'America/New_York')
+  // Attendees
+  organizerEmail    String?  // Organizer email
+  organizerName     String?  // Organizer display name
+  attendeeEmails    String[] // Array of attendee email addresses
+  attendeeNames     String[] // Array of attendee display names (parallel to emails)
+  // Status & Visibility
+  status            String?  // 'confirmed', 'tentative', 'cancelled'
+  visibility        String?  // 'default', 'public', 'private', 'confidential'
+  // Recurrence
+  recurrence        String[] // RRULE strings (e.g., ['RRULE:FREQ=WEEKLY;BYDAY=MO'])
+  // Metadata
+  htmlLink          String?  // Link to open event in Google Calendar
+  hangoutLink       String?  // Google Meet/Hangout link
+  colorId           String?  // Calendar color ID
+  // Sync & Lifecycle
+  isDeleted         Boolean  @default(false) // Soft delete
+  syncedAt          DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  integrationAccount IntegrationAccount @relation(fields: [integrationAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([integrationAccountId, calendarId, googleEventId])
+  @@index([integrationAccountId])
+  @@index([calendarId])
+  @@index([googleEventId])
+  @@index([iCalUID])
+  @@index([isDeleted])
+  @@index([startDateTime])
+  @@index([startDate])
+  @@map("calendar_events")
+}
