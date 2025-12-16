@@ -4,6 +4,7 @@ export interface IdTokenClaims {
   name?: string;
   given_name?: string;
   family_name?: string;
+  provider?: any;
 }
 
 export class JwtUtil {
@@ -28,6 +29,7 @@ export class JwtUtil {
         name: claims.name,
         given_name: claims.given_name,
         family_name: claims.family_name,
+        provider: claims.identities.first?.providerName,
       };
     } catch (error) {
       throw new Error(
