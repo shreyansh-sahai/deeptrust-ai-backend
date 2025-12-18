@@ -1,7 +1,5 @@
 export class Contact {
   id: string;
-  integrationAccountId: string;
-  googleResourceName?: string;
   firstName?: string;
   lastName?: string;
   displayName?: string;
@@ -11,19 +9,13 @@ export class Contact {
   jobTitle?: string;
   notes?: string;
   photoUrl?: string;
-  isDeleted: boolean;
-  syncedAt: Date;
   createdAt: Date;
   updatedAt: Date;
 
   constructor(
     id: string,
-    integrationAccountId: string,
-    isDeleted: boolean,
-    syncedAt: Date,
     createdAt: Date,
     updatedAt: Date,
-    googleResourceName?: string,
     firstName?: string,
     lastName?: string,
     displayName?: string,
@@ -35,8 +27,6 @@ export class Contact {
     photoUrl?: string,
   ) {
     this.id = id;
-    this.integrationAccountId = integrationAccountId;
-    this.googleResourceName = googleResourceName;
     this.firstName = firstName;
     this.lastName = lastName;
     this.displayName = displayName;
@@ -46,8 +36,6 @@ export class Contact {
     this.jobTitle = jobTitle;
     this.notes = notes;
     this.photoUrl = photoUrl;
-    this.isDeleted = isDeleted;
-    this.syncedAt = syncedAt;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
   }

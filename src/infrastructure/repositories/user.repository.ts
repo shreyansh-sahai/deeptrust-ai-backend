@@ -43,7 +43,7 @@ export class UserRepository {
 
   async update(
     id: string,
-    data: { fullName?: string; isActive?: boolean },
+    data: { fullName?: string; isActive?: boolean, contactId?: string, metadata?: any },
   ): Promise<User> {
     const user = await this.prisma.user.update({
       where: { id },
@@ -57,6 +57,8 @@ export class UserRepository {
       user.updatedAt,
       user.isActive,
       user.fullName ?? undefined,
+      user.contactId ?? undefined,
+      user.metadata ?? undefined,
     );
   }
 }
