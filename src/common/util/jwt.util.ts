@@ -5,6 +5,8 @@ export interface IdTokenClaims {
   given_name?: string;
   family_name?: string;
   provider?: any;
+  access_token?: string;
+  picture?: string;
 }
 
 export class JwtUtil {
@@ -29,7 +31,9 @@ export class JwtUtil {
         name: claims.name,
         given_name: claims.given_name,
         family_name: claims.family_name,
-        provider: claims.identities.first?.providerName,
+        provider: claims.identities[0].providerName || 'cognito',
+        access_token: claims['custom:access_token'],
+        picture: claims.picture,
       };
     } catch (error) {
       throw new Error(

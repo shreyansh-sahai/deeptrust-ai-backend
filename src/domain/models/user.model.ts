@@ -5,6 +5,8 @@ export class User {
   createdAt: Date;
   updatedAt: Date;
   isActive: boolean;
+  contactId?: string;
+  metadata?: any;
 
   constructor(
     id: string,
@@ -13,6 +15,8 @@ export class User {
     updatedAt: Date,
     isActive: boolean,
     fullName?: string,
+    contactId?: string,
+    metadata?: any,
   ) {
     this.id = id;
     this.email = email;
@@ -20,5 +24,7 @@ export class User {
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
     this.isActive = isActive;
+    this.contactId = contactId;
+    this.metadata = metadata;
   }
 }

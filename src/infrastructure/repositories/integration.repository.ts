@@ -27,6 +27,26 @@ export class IntegrationRepository {
     );
   }
 
+  async findBySlug(slug: string): Promise<Integration | null> {
+    const integration = await this.prisma.integration.findFirst({
+      where: { slug },
+    });
+
+    if (!integration) return null;
+
+    return new Integration(
+      integration.id,
+      integration.slug,
+      integration.name,
+      integration.provider,
+      integration.isGlobalEnabled,
+      integration.requiredScopes,
+      integration.createdAt,
+      integration.authBaseUrl ?? undefined,
+      integration.tokenUrl ?? undefined,
+    );
+  }
+
   async create(integration: CreateIntegrationDto): Promise<Integration> {
     const createdIntegration = await this.prisma.integration.create({
       data: integration,

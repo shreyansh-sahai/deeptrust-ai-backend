@@ -21,9 +21,11 @@ export class AuthController {
     if (!code) {
       throw new BadRequestException('Missing authorization code');
     }
-    const token =
+    const data =
       await this.authService.exchangeCodeForTokens(code, provider);
 
-    return res.json(token);
+    const encodedData = encodeURIComponent(data);
+
+    return res.json(encodedData);
   }
 }
