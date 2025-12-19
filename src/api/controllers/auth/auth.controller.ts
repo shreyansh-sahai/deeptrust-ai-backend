@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from '@application/auth/services/auth.service';
+import { Config } from '@common/util/config';
 
 @Controller('auth')
 export class AuthController {
@@ -26,6 +27,6 @@ export class AuthController {
 
     const encodedData = encodeURIComponent(data);
 
-    return res.json(encodedData);
+    return res.redirect(Config.FRONTEND_SUCCESS_URL + '?auth=success&data=' + encodedData);
   }
 }

@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import axios from 'axios';
 import { Config } from '@common/util/config';
 import { JwtUtil } from '@common/util/jwt.util';
+import { CryptoUtil } from '@common/util/crypto.util';
 import { UserRepository } from '@infrastructure/repositories/user.repository';
 import { IntegrationRepository } from '@infrastructure/repositories/integration.repository';
 import { IntegrationAccountRepository } from '@infrastructure/repositories/integration-account.repository';
@@ -56,8 +57,8 @@ export class AuthService {
           provider,
           userInfo.sub,
           userInfo.email,
-          access_token,
-          refresh_token,
+          userInfo.access_token || '',
+          userInfo.refresh_token || '',
           tokenExpiry,
           scopes,
           userInfo
@@ -68,8 +69,8 @@ export class AuthService {
           userInfo.name,
           provider,
           userInfo.sub,
-          access_token,
-          refresh_token,
+          userInfo.access_token || '',
+          userInfo.refresh_token || '',
           tokenExpiry,
           scopes,
           userInfo
@@ -110,13 +111,13 @@ export class AuthService {
           return scopes;
         }
         else if (provider === 'Microsoft') {
-          const response = await axios.get('https://graph.microsoft.com/v1.0/me', {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          });
-
-          const scopes = response.data.scope.split(' ');
+          // const response = await axios.get('https://graph.microsoft.com/v1.0/me', {
+          //   headers: {
+          //     Authorization: `Bearer ${accessToken}`,
+          //   },
+          // });
+          const microsoftScope = 'Contacts.Read Mail.Read Calendars.Read';
+          const scopes = microsoftScope.split(' ');
           return scopes;
         }
       }
@@ -184,16 +185,16 @@ export class AuthService {
           integrationId: integration.id,
           remoteProviderId,
           remoteEmail,
-          accessTokenEnc: accessToken,
-          refreshTokenEnc: refreshToken,
+          accessTokenEnc: CryptoUtil.encrypt(accessToken),
+          refreshTokenEnc: CryptoUtil.encrypt(refreshToken),
           tokenExpiresAt: tokenExpiry,
           scopesGranted: integration.requiredScopes,
         });
       }
       else {
         await this.integrationAccountRepository.update(integrationAccount.id, {
-          accessTokenEnc: accessToken,
-          refreshTokenEnc: refreshToken,
+          accessTokenEnc: CryptoUtil.encrypt(accessToken),
+          refreshTokenEnc: CryptoUtil.encrypt(refreshToken),
           tokenExpiresAt: tokenExpiry,
           scopesGranted: integration.requiredScopes,
         });
@@ -260,16 +261,16 @@ export class AuthService {
           integrationId: integration.id,
           remoteProviderId,
           remoteEmail: email,
-          accessTokenEnc: accessToken,
-          refreshTokenEnc: refreshToken,
+          accessTokenEnc: CryptoUtil.encrypt(accessToken),
+          refreshTokenEnc: CryptoUtil.encrypt(refreshToken),
           tokenExpiresAt: tokenExpiry,
           scopesGranted: integration.requiredScopes,
         });
       }
       else {
         await this.integrationAccountRepository.update(integrationAccount.id, {
-          accessTokenEnc: accessToken,
-          refreshTokenEnc: refreshToken,
+          accessTokenEnc: CryptoUtil.encrypt(accessToken),
+          refreshTokenEnc: CryptoUtil.encrypt(refreshToken),
           tokenExpiresAt: tokenExpiry,
           scopesGranted: integration.requiredScopes,
         });
