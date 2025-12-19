@@ -30,7 +30,11 @@ export class Config {
   }
 
   static get FRONTEND_SUCCESS_URL(): string {
-    return 'https://staging.mydeeptrust.ai/';
+    return 'https://staging.mydeeptrust.ai/auth/callback';
+  }
+
+  static get DATA_PIPELINE_API_URL(): string {
+    return 'https://data.dev.mydeeptrust.ai/';
   }
 
   static get ENCRYPTION_KEY(): string {
