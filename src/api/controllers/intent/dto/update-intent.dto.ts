@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsObject, IsUUID } from 'class-validator';
+import { IsOptional, IsString, IsObject, IsUUID, IsUrl } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateIntentDto {
@@ -35,4 +35,14 @@ export class UpdateIntentDto {
   @IsObject()
   @IsOptional()
   metadata?: Record<string, any>;
+
+  @ApiProperty({
+    description: 'Updated voice file link',
+    example: 'https://example.com/voice/new-recording.mp3',
+    required: false,
+    nullable: true,
+  })
+  @IsUrl()
+  @IsOptional()
+  voiceFileLink?: string | null;
 }
