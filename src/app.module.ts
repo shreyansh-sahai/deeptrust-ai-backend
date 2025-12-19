@@ -6,6 +6,7 @@ import { AuthService } from '@application/auth/services/auth.service';
 import { HealthModule } from '@api/health/health.module';
 import { IntentModule } from '@api/controllers/intent/intent.module';
 import { ProfileModule } from '@api/controllers/profile/profile.module';
+import { NetworkModule } from '@api/controllers/network/network.module';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({
@@ -15,6 +16,7 @@ import { JwtModule } from '@nestjs/jwt';
     HealthModule,
     IntentModule,
     ProfileModule,
+    NetworkModule,
     JwtModule.register({
       global: true,
       secret: 'sJpPXkD+5fLJfph1z0yCqQmTsk+3e0A2tZT90pJ1mU0=',
