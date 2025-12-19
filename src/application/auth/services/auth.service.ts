@@ -43,8 +43,8 @@ export class AuthService {
         response.data;
 
       const userInfo = JwtUtil.decodeIdToken(id_token);
-      if (!provider || provider === undefined)
-        provider = userInfo.provider;
+      // if (!provider || provider === undefined)
+      provider = userInfo.provider;
 
       const tokenExpiry = JwtUtil.calculateTokenExpiry(expires_in);
 
