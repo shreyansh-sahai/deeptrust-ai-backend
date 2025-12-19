@@ -28,4 +28,12 @@ export class Config {
   static get COGNITO_REDIRECT_URI(): string {
     return this.get('COGNITO_REDIRECT_URI');
   }
+
+  static get FRONTEND_SUCCESS_URL(): string {
+    return 'https://staging.mydeeptrust.ai/';
+  }
+
+  static get ENCRYPTION_KEY(): string {
+    return 'change-this-to-a-secure-random-key-in-production'
+  };
 }
