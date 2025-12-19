@@ -28,6 +28,7 @@ model User {
 
   integrationAccounts IntegrationAccount[]
   userContacts        UserContact[]
+  networkUserIntents  NetworkUserIntent[]
 
   @@map("users")
 }
@@ -329,6 +330,29 @@ model CalendarEvent {
   @@index([startDateTime])
   @@index([startDate])
   @@map("calendar_events")
+}
+
+
+// ============================================
+// network_user_intent.prisma
+// ============================================
+
+model NetworkUserIntent {
+  id                 String    @id @default(uuid())
+  userId             String
+  intent             String
+  intent_description String
+  metadata           Json      @default("{}")
+  voice_file_link    String?
+  created_at         DateTime  @default(now())
+  updated_at         DateTime?
+  isDeleted          Boolean   @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isDeleted])
+  @@map("network_user_intents")
 }
 
 

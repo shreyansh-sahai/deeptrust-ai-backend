@@ -5,19 +5,25 @@ import {
   Body,
   UsePipes,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBody,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { ProfileService } from '@application/profile/services/profile.service';
 import { AddProfileDto } from './dto/add-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ProfileResponseDto } from './dto/profile-response.dto';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { CurrentUser } from '@common/decorators/current-user.decorator';
 
 @ApiTags('profile')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('api/profile')
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
@@ -35,9 +41,12 @@ export class ProfileController {
     status: 400,
     description: 'Invalid input data',
   })
-  async addProfile(@Body() dto: AddProfileDto): Promise<ProfileResponseDto> {
+  async addProfile(
+    @CurrentUser('sub') userId: string,
+    @Body() dto: AddProfileDto,
+  ): Promise<ProfileResponseDto> {
     const profile = await this.profileService.createProfile(
-      dto.userId,
+      userId,
       dto.professionalHeadline,
       dto.professionalBio,
       dto.state,
@@ -78,10 +87,11 @@ export class ProfileController {
     description: 'Profile not found',
   })
   async updateProfile(
+    @CurrentUser('sub') userId: string,
     @Body() dto: UpdateProfileDto,
   ): Promise<ProfileResponseDto> {
     const profile = await this.profileService.updateProfile(
-      dto.userId,
+      userId,
       dto.professionalHeadline,
       dto.professionalBio,
       dto.state,

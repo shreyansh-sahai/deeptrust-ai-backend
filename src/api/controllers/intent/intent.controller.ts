@@ -8,6 +8,7 @@ import {
   Param,
   UsePipes,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -15,13 +16,18 @@ import {
   ApiResponse,
   ApiParam,
   ApiBody,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { IntentService } from '@application/intent/services/intent.service';
 import { AddIntentDto } from './dto/add-intent.dto';
 import { UpdateIntentDto } from './dto/update-intent.dto';
 import { IntentResponseDto } from './dto/intent-response.dto';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { CurrentUser } from '@common/decorators/current-user.decorator';
 
 @ApiTags('intents')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('api/intents')
 export class IntentController {
   constructor(private readonly intentService: IntentService) {}
@@ -39,12 +45,16 @@ export class IntentController {
     status: 400,
     description: 'Invalid input data',
   })
-  async addIntent(@Body() dto: AddIntentDto): Promise<IntentResponseDto> {
+  async addIntent(
+    @CurrentUser('sub') userId: string,
+    @Body() dto: AddIntentDto,
+  ): Promise<IntentResponseDto> {
     const intent = await this.intentService.createIntent(
-      dto.userId,
+      userId,
       dto.goalTitle,
       dto.goalDescription,
       dto.metadata,
+      dto.voiceFileLink,
     );
 
     return {
@@ -77,6 +87,7 @@ export class IntentController {
       dto.goalTitle,
       dto.goalDescription,
       dto.metadata,
+      dto.voiceFileLink,
     );
 
     return {
@@ -146,20 +157,15 @@ export class IntentController {
     };
   }
 
-  @Get(':userId')
-  @ApiOperation({ summary: 'Get all intents for a specific user' })
-  @ApiParam({
-    name: 'userId',
-    description: 'The ID of the user',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
+  @Get('my-intents')
+  @ApiOperation({ summary: 'Get all intents for the current user' })
   @ApiResponse({
     status: 200,
     description: 'List of intents retrieved successfully',
     type: [IntentResponseDto],
   })
-  async getIntentsByUserId(
-    @Param('userId') userId: string,
+  async getMyIntents(
+    @CurrentUser('sub') userId: string,
   ): Promise<IntentResponseDto[]> {
     const intents = await this.intentService.getIntentsByUserId(userId);
 

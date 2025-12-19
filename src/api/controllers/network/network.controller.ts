@@ -6,6 +6,7 @@ import {
   Param,
   UsePipes,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -13,13 +14,18 @@ import {
   ApiResponse,
   ApiBody,
   ApiParam,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { NetworkService } from '@application/network/services/network.service';
 import { SaveNetworkDto } from './dto/save-network.dto';
 import { NetworkResponseDto } from './dto/network-response.dto';
 import { INetworkType } from '@domain/value-objects/network-type';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { CurrentUser } from '@common/decorators/current-user.decorator';
 
 @ApiTags('network')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('api/network')
 export class NetworkController {
   constructor(private readonly networkService: NetworkService) {}
@@ -38,10 +44,11 @@ export class NetworkController {
     description: 'Invalid input data',
   })
   async saveNetwork(
+    @CurrentUser('sub') userId: string,
     @Body() dto: SaveNetworkDto,
   ): Promise<NetworkResponseDto> {
     const result = await this.networkService.saveNetwork(
-      dto.userId,
+      userId,
       dto.contactId,
       dto.networkType,
       dto.buckets,
@@ -74,13 +81,8 @@ export class NetworkController {
     return await this.networkService.getNetworkTypes();
   }
 
-  @Get('buckets/:userId')
-  @ApiOperation({ summary: 'Get bucket list for a specific user' })
-  @ApiParam({
-    name: 'userId',
-    description: 'User ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
+  @Get('my-buckets')
+  @ApiOperation({ summary: 'Get bucket list for the current user' })
   @ApiResponse({
     status: 200,
     description: 'List of buckets for the user',
@@ -92,7 +94,7 @@ export class NetworkController {
       example: ['executive-team', 'board-members', 'investors'],
     },
   })
-  async getBuckets(@Param('userId') userId: string): Promise<string[]> {
+  async getMyBuckets(@CurrentUser('sub') userId: string): Promise<string[]> {
     return await this.networkService.getBucketsByUserId(userId);
   }
 }

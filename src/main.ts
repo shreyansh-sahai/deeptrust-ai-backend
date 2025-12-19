@@ -22,6 +22,7 @@ async function bootstrap() {
     .setDescription('API documentation for DeepTrust AI Backend')
     .setVersion('1.0')
     .addTag('API')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

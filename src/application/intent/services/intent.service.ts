@@ -1,30 +1,30 @@
 import { Injectable } from '@nestjs/common';
 import { Intent } from '@domain/models/intent.model';
+import { IntentRepository } from '@infrastructure/repositories/intent.repository';
 
 @Injectable()
 export class IntentService {
-
+  constructor(private readonly intentRepository: IntentRepository) {}
 
   async createIntent(
     userId: string,
     goalTitle: string,
     goalDescription: string,
     metadata: Record<string, any>,
+    voiceFileLink?: string | null,
   ): Promise<Intent> {
     console.log(`Creating intent for user ${userId}: ${goalTitle}`);
     
-    const mockIntent = new Intent(
-      'stub-id-' + Date.now(),
+    const intent = await this.intentRepository.create(
       userId,
       goalTitle,
       goalDescription,
       metadata,
-      new Date(),
-      new Date(),
+      voiceFileLink,
     );
 
-    console.log('Intent created (stub - not saved to DB)');
-    return mockIntent;
+    console.log(`Intent created with ID: ${intent.id}`);
+    return intent;
   }
 
   async updateIntent(
@@ -32,27 +32,28 @@ export class IntentService {
     goalTitle?: string,
     goalDescription?: string,
     metadata?: Record<string, any>,
+    voiceFileLink?: string | null,
   ): Promise<Intent> {
     console.log(`Updating intent ${intentId}`);
     
-    const mockIntent = new Intent(
+    const intent = await this.intentRepository.update(
       intentId,
-      'stub-user-id',
-      goalTitle || 'Updated Goal Title',
-      goalDescription || 'Updated Goal Description',
-      metadata || { updated: true },
-      new Date(Date.now() - 86400000),
-      new Date(),
+      goalTitle,
+      goalDescription,
+      metadata,
+      voiceFileLink,
     );
 
-    console.log('Intent updated (stub - not saved to DB)');
-    return mockIntent;
+    console.log(`Intent ${intentId} updated successfully`);
+    return intent;
   }
 
   async deleteIntent(intentId: string): Promise<{ success: boolean; message: string }> {
     console.log(`Deleting intent ${intentId}`);
     
-    console.log('Intent deleted (stub - not removed from DB)');
+    await this.intentRepository.softDelete(intentId);
+
+    console.log(`Intent ${intentId} soft deleted successfully`);
     return {
       success: true,
       message: `Intent ${intentId} deleted successfully`,
@@ -62,45 +63,22 @@ export class IntentService {
   async getIntentById(intentId: string): Promise<Intent> {
     console.log(`Fetching intent ${intentId}`);
     
-    const mockIntent = new Intent(
-      intentId,
-      'stub-user-id',
-      'Sample Goal Title',
-      'Sample Goal Description',
-      { sample: true },
-      new Date(Date.now() - 86400000),
-      new Date(),
-    );
+    const intent = await this.intentRepository.findById(intentId);
 
-    console.log('Intent fetched (stub - not from DB)');
-    return mockIntent;
+    if (!intent) {
+      throw new Error(`Intent with ID ${intentId} not found`);
+    }
+
+    console.log(`Intent ${intentId} fetched successfully`);
+    return intent;
   }
 
   async getIntentsByUserId(userId: string): Promise<Intent[]> {
     console.log(`Fetching intents for user ${userId}`);
     
-    const mockIntents = [
-      new Intent(
-        'stub-id-1',
-        userId,
-        'First Goal',
-        'Description of first goal',
-        { priority: 'high' },
-        new Date(Date.now() - 172800000),
-        new Date(Date.now() - 86400000),
-      ),
-      new Intent(
-        'stub-id-2',
-        userId,
-        'Second Goal',
-        'Description of second goal',
-        { priority: 'medium' },
-        new Date(Date.now() - 86400000),
-        new Date(),
-      ),
-    ];
+    const intents = await this.intentRepository.findByUserId(userId);
 
-    console.log(`Found ${mockIntents.length} intents for user (stub - not from DB)`);
-    return mockIntents;
+    console.log(`Found ${intents.length} intents for user ${userId}`);
+    return intents;
   }
 }
