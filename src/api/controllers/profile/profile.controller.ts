@@ -65,7 +65,6 @@ export class ProfileController {
     );
 
     return {
-      userId: profile.userId,
       professionalHeadline: profile.professionalHeadline,
       professionalBio: profile.professionalBio,
       currentOrganization: profile.currentOrganization,
@@ -112,7 +111,6 @@ export class ProfileController {
     );
 
     return {
-      userId: profile.userId,
       professionalHeadline: profile.professionalHeadline,
       professionalBio: profile.professionalBio,
       currentOrganization: profile.currentOrganization,
@@ -148,7 +146,6 @@ export class ProfileController {
     }
 
     return {
-      userId: profile.userId,
       professionalHeadline: profile.professionalHeadline,
       professionalBio: profile.professionalBio,
       currentOrganization: profile.currentOrganization,

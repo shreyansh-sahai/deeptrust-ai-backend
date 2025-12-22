@@ -62,7 +62,6 @@ export class IntentController {
 
     return {
       id: intent.id,
-      userId: intent.userId,
       goalTitle: intent.goalTitle,
       goalDescription: intent.goalDescription,
       metadata: intent.metadata,
@@ -95,7 +94,6 @@ export class IntentController {
 
     return {
       id: intent.id,
-      userId: intent.userId,
       goalTitle: intent.goalTitle,
       goalDescription: intent.goalDescription,
       metadata: intent.metadata,
@@ -151,7 +149,6 @@ export class IntentController {
 
     return {
       id: intent.id,
-      userId: intent.userId,
       goalTitle: intent.goalTitle,
       goalDescription: intent.goalDescription,
       metadata: intent.metadata,
@@ -174,7 +171,6 @@ export class IntentController {
 
     return intents.map((intent) => ({
       id: intent.id,
-      userId: intent.userId,
       goalTitle: intent.goalTitle,
       goalDescription: intent.goalDescription,
       metadata: intent.metadata,
