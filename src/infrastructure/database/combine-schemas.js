@@ -20,6 +20,7 @@ const schemaFiles = [
   'contact.prisma',
   'email.prisma',
   'calendar.prisma',
+  'network_user_intent.prisma',
 ];
 
 let combinedContent = '';

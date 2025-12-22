@@ -39,8 +39,7 @@ export class AuthService {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       });
-      const { access_token, refresh_token, expires_in, id_token } =
-        response.data;
+      const { expires_in, id_token } = response.data;
 
       const userInfo = JwtUtil.decodeIdToken(id_token);
       // if (!provider || provider === undefined)
@@ -76,6 +75,8 @@ export class AuthService {
           userInfo
         );
       }
+
+
 
       var sessionToken = await this.createSessionToken({
         sub: user.id,
@@ -126,6 +127,8 @@ export class AuthService {
       }
     }
   }
+
+
 
   private async handleExistingUser(
     user: User,
@@ -200,9 +203,8 @@ export class AuthService {
         });
       }
     });
+
   }
-
-
 
   private async handleNewUser(
     email: string,

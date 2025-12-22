@@ -20,6 +20,8 @@ export class UserRepository {
       user.updatedAt,
       user.isActive,
       user.fullName ?? undefined,
+      user.contactId ?? undefined,
+      user.metadata ?? undefined,
     );
   }
 
@@ -38,6 +40,8 @@ export class UserRepository {
       user.updatedAt,
       user.isActive,
       user.fullName ?? undefined,
+      user.contactId ?? undefined,
+      user.metadata ?? undefined,
     );
   }
 

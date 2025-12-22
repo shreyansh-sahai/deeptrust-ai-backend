@@ -136,7 +136,7 @@ export class SyncService {
             try {
               const event = JSON.parse(line);
               eventSubject.next(event as SyncProgressEvent);
-            } catch (error) {
+            } catch {
               this.logger.warn(`Failed to parse progress line: ${line}`);
             }
           }
