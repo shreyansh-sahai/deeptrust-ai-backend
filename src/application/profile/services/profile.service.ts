@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { UserProfile } from '@domain/models/user-profile.model';
+import { UserProfileRepository } from '@infrastructure/repositories/user-profile.repository';
 
 @Injectable()
 export class ProfileService {
+  constructor(private readonly profileRepository: UserProfileRepository) {}
+
   async createProfile(
     userId: string,
     professionalHeadline?: string,
     professionalBio?: string,
+    currentOrganization?: string,
     state?: string,
     city?: string,
     country?: string,
@@ -15,13 +19,12 @@ export class ProfileService {
     mobileNumber?: string,
     linkedinUrl?: string,
   ): Promise<UserProfile> {
-    console.log(`Creating profile for user ${userId}`);
-
-    const mockProfile = new UserProfile(
+    const profile = new UserProfile(
       userId,
       new Date(),
       professionalHeadline,
       professionalBio,
+      currentOrganization,
       state,
       city,
       country,
@@ -31,14 +34,14 @@ export class ProfileService {
       linkedinUrl,
     );
 
-    console.log('Profile created (stub - not saved to DB)');
-    return mockProfile;
+    return await this.profileRepository.save(profile);
   }
 
   async updateProfile(
     userId: string,
     professionalHeadline?: string,
     professionalBio?: string,
+    currentOrganization?: string,
     state?: string,
     city?: string,
     country?: string,
@@ -47,23 +50,27 @@ export class ProfileService {
     mobileNumber?: string,
     linkedinUrl?: string,
   ): Promise<UserProfile> {
-    console.log(`Updating profile for user ${userId}`);
+    const existingProfile = await this.profileRepository.findByUserId(userId);
 
-    const mockProfile = new UserProfile(
+    const profile = new UserProfile(
       userId,
       new Date(),
-      professionalHeadline || 'Updated Professional Headline',
-      professionalBio || 'Updated professional bio',
-      state,
-      city,
-      country,
-      timezone,
-      videoIntroductionURL,
-      mobileNumber,
-      linkedinUrl,
+      professionalHeadline ?? existingProfile?.professionalHeadline,
+      professionalBio ?? existingProfile?.professionalBio,
+      currentOrganization ?? existingProfile?.currentOrganization,
+      state ?? existingProfile?.state,
+      city ?? existingProfile?.city,
+      country ?? existingProfile?.country,
+      timezone ?? existingProfile?.timezone,
+      videoIntroductionURL ?? existingProfile?.videoIntroductionURL,
+      mobileNumber ?? existingProfile?.mobileNumber,
+      linkedinUrl ?? existingProfile?.linkedinUrl,
     );
 
-    console.log('Profile updated (stub - not saved to DB)');
-    return mockProfile;
+    return await this.profileRepository.save(profile);
+  }
+
+  async getProfileByUserId(userId: string): Promise<UserProfile | null> {
+    return await this.profileRepository.findByUserId(userId);
   }
 }

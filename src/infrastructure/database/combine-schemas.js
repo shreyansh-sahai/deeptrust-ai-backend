@@ -15,6 +15,7 @@ const outputFile = path.join(__dirname, '..', 'schema.prisma');
 const schemaFiles = [
   'base.prisma',
   'user.prisma',
+  'user_profile.prisma',
   'integration.prisma',
   'sync.prisma',
   'contact.prisma',

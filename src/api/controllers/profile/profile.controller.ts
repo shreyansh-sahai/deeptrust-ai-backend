@@ -24,7 +24,10 @@ import { CurrentUser } from '@common/decorators/current-user.decorator';
 @ApiTags('profile')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('api/profile')
+@Controller({
+  path: 'profile',
+  version: '1',
+})
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
@@ -49,6 +52,7 @@ export class ProfileController {
       userId,
       dto.professionalHeadline,
       dto.professionalBio,
+      dto.currentOrganization,
       dto.state,
       dto.city,
       dto.country,
@@ -62,6 +66,7 @@ export class ProfileController {
       userId: profile.userId,
       professionalHeadline: profile.professionalHeadline,
       professionalBio: profile.professionalBio,
+      currentOrganization: profile.currentOrganization,
       state: profile.state,
       city: profile.city,
       country: profile.country,
@@ -94,6 +99,7 @@ export class ProfileController {
       userId,
       dto.professionalHeadline,
       dto.professionalBio,
+      dto.currentOrganization,
       dto.state,
       dto.city,
       dto.country,
@@ -107,6 +113,7 @@ export class ProfileController {
       userId: profile.userId,
       professionalHeadline: profile.professionalHeadline,
       professionalBio: profile.professionalBio,
+      currentOrganization: profile.currentOrganization,
       state: profile.state,
       city: profile.city,
       country: profile.country,

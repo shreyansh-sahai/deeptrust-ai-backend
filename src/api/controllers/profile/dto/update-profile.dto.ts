@@ -21,6 +21,15 @@ export class UpdateProfileDto {
   professionalBio?: string;
 
   @ApiProperty({
+    description: 'Current organization of the user',
+    example: 'DeepTrust AI',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  currentOrganization?: string;
+
+  @ApiProperty({
     description: 'Updated state',
     example: 'New York',
     required: false,
