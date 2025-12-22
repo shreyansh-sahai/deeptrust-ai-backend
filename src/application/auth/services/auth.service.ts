@@ -10,6 +10,7 @@ import { IntegrationAccountRepository } from '@infrastructure/repositories/integ
 import { ContactRepository } from '@infrastructure/repositories/contact.repository';
 import { User } from '@domain/models/user.model';
 import { StreamService } from './streamService.service';
+import { UserResponseDto } from '@api/controllers/auth/dto/user-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -26,8 +27,27 @@ export class AuthService {
     private readonly streamService: StreamService,
   ) { }
 
-  async getMe(userId: string) {
-    return await this.userRepository.findById(userId);
+  async getMe(userId: string): Promise<UserResponseDto | undefined> {
+    const user = await this.userRepository.findById(userId);
+    if (user && user.contactId) {
+      const contact = await this.contactRepository.findById(user.contactId);
+      if (contact) {
+        return new UserResponseDto(
+          contact.firstName,
+          contact.lastName,
+          contact.email,
+          contact.displayName,
+          contact.photoUrl,
+        );
+      }
+      else {
+        return new UserResponseDto(
+          user.fullName,
+          user.email,
+          user.fullName,
+        );
+      }
+    }
   }
 
   async exchangeCodeForTokens(code: string, provider: string) {

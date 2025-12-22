@@ -14,6 +14,7 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { User } from '@domain/models/user.model';
+import { UserResponseDto } from './dto/user-response.dto';
 
 @ApiTags('auth')
 @Controller({
@@ -60,7 +61,7 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'User details',
-    type: User,
+    type: UserResponseDto,
   })
   @ApiResponse({
     status: 401,
@@ -68,7 +69,7 @@ export class AuthController {
   })
   async getMe(
     @CurrentUser('sub') userId: string,
-  ): Promise<User> {
+  ): Promise<UserResponseDto> {
     const user = await this.authService.getMe(userId);
     if (!user) {
       throw new NotFoundException('User not found');

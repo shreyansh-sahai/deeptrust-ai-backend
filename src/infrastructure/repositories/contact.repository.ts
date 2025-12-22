@@ -55,4 +55,22 @@ export class ContactRepository {
             contact.photoUrl || undefined,
         ) : null;
     }
+
+    async findById(id: string): Promise<Contact | null> {
+        const contact = await this.prisma.contact.findUnique({ where: { id } });
+        return contact ? new Contact(
+            contact.id,
+            contact.createdAt,
+            contact.updatedAt,
+            contact.firstName || undefined,
+            contact.lastName || undefined,
+            contact.displayName || undefined,
+            contact.email || undefined,
+            contact.phoneNumber || undefined,
+            contact.organization || undefined,
+            contact.jobTitle || undefined,
+            contact.notes || undefined,
+            contact.photoUrl || undefined,
+        ) : null;
+    }
 }
