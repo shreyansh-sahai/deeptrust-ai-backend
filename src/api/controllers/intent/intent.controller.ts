@@ -33,7 +33,7 @@ import { CurrentUser } from '@common/decorators/current-user.decorator';
   version: '1',
 })
 export class IntentController {
-  constructor(private readonly intentService: IntentService) {}
+  constructor(private readonly intentService: IntentService) { }
 
   @Post('add-intent')
   @UsePipes(new ValidationPipe({ transform: true }))
