@@ -13,8 +13,6 @@ export class IntentService {
     metadata: Record<string, any>,
     voiceFileLink?: string | null,
   ): Promise<Intent> {
-    console.log(`Creating intent for user ${userId}: ${goalTitle}`);
-    
     const intent = await this.intentRepository.create(
       userId,
       goalTitle,
@@ -23,7 +21,6 @@ export class IntentService {
       voiceFileLink,
     );
 
-    console.log(`Intent created with ID: ${intent.id}`);
     return intent;
   }
 
@@ -34,8 +31,6 @@ export class IntentService {
     metadata?: Record<string, any>,
     voiceFileLink?: string | null,
   ): Promise<Intent> {
-    console.log(`Updating intent ${intentId}`);
-    
     const intent = await this.intentRepository.update(
       intentId,
       goalTitle,
@@ -44,16 +39,12 @@ export class IntentService {
       voiceFileLink,
     );
 
-    console.log(`Intent ${intentId} updated successfully`);
     return intent;
   }
 
   async deleteIntent(intentId: string): Promise<{ success: boolean; message: string }> {
-    console.log(`Deleting intent ${intentId}`);
-    
     await this.intentRepository.softDelete(intentId);
 
-    console.log(`Intent ${intentId} soft deleted successfully`);
     return {
       success: true,
       message: `Intent ${intentId} deleted successfully`,
@@ -61,24 +52,17 @@ export class IntentService {
   }
 
   async getIntentById(intentId: string): Promise<Intent> {
-    console.log(`Fetching intent ${intentId}`);
-    
     const intent = await this.intentRepository.findById(intentId);
 
     if (!intent) {
       throw new Error(`Intent with ID ${intentId} not found`);
     }
 
-    console.log(`Intent ${intentId} fetched successfully`);
     return intent;
   }
 
   async getIntentsByUserId(userId: string): Promise<Intent[]> {
-    console.log(`Fetching intents for user ${userId}`);
-    
     const intents = await this.intentRepository.findByUserId(userId);
-
-    console.log(`Found ${intents.length} intents for user ${userId}`);
     return intents;
   }
 }
