@@ -5,6 +5,7 @@ import { AuthController } from '@api/controllers/auth/auth.controller';
 import { AuthService } from '@application/auth/services/auth.service';
 import { HealthModule } from '@api/health/health.module';
 import { JwtModule } from '@nestjs/jwt';
+import { StreamService } from '@application/auth/services/streamService.service';
 
 @Module({
   imports: [
@@ -18,6 +19,6 @@ import { JwtModule } from '@nestjs/jwt';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, StreamService],
 })
 export class AppModule { }

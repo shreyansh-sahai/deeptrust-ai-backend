@@ -9,6 +9,7 @@ import { IntegrationRepository } from '@infrastructure/repositories/integration.
 import { IntegrationAccountRepository } from '@infrastructure/repositories/integration-account.repository';
 import { ContactRepository } from '@infrastructure/repositories/contact.repository';
 import { User } from '@domain/models/user.model';
+import { StreamService } from './streamService.service';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +23,7 @@ export class AuthService {
     private readonly integrationAccountRepository: IntegrationAccountRepository,
     private readonly jwtService: JwtService,
     private readonly contactRepository: ContactRepository,
+    private readonly streamService: StreamService,
   ) { }
 
   async exchangeCodeForTokens(code: string, provider: string) {
@@ -61,7 +63,8 @@ export class AuthService {
           userInfo.refresh_token || '',
           tokenExpiry,
           scopes,
-          userInfo
+          userInfo,
+          access_token
         );
       } else {
         user = await this.handleNewUser(
@@ -73,7 +76,8 @@ export class AuthService {
           userInfo.refresh_token || '',
           tokenExpiry,
           scopes,
-          userInfo
+          userInfo,
+          access_token
         );
       }
 
@@ -85,8 +89,8 @@ export class AuthService {
 
       const code = JSON.stringify({
         token: sessionToken,
-        isOnboarded: false,
-        onboardingStep: 1,
+        isOnboarded: user.metadata?.isOnboarded,
+        onboardingStep: user.metadata?.onboardingStep,
       });
 
       return code;
@@ -137,6 +141,7 @@ export class AuthService {
     tokenExpiry: Date,
     scopes: string[],
     userInfo: any,
+    cognito_access_token: string,
   ): Promise<void> {
 
     if (!user.contactId) {
@@ -202,8 +207,6 @@ export class AuthService {
     });
   }
 
-
-
   private async handleNewUser(
     email: string,
     fullName: string | undefined,
@@ -214,6 +217,7 @@ export class AuthService {
     tokenExpiry: Date,
     scopes: string[],
     userInfo: any,
+    cognito_access_token: string,
   ) {
     const user = await this.userRepository.create(email, fullName);
 
@@ -275,7 +279,44 @@ export class AuthService {
           scopesGranted: integration.requiredScopes,
         });
       }
+
+      if (integrationAccount && slug.includes("contact")) {
+        let request = {
+          "integration_account_id": integrationAccount.id,
+          "resource_type": "contact",
+          "sync_full_content": false
+        }
+        setImmediate(() => {
+          this.streamService.execute(request, cognito_access_token);
+        });
+        console.log('contact stream started');
+      }
+      else
+        if (integrationAccount && slug.includes("calendar")) {
+          let request = {
+            "integration_account_id": integrationAccount.id,
+            "resource_type": "calendar",
+            "sync_full_content": false
+          }
+          setImmediate(() => {
+            this.streamService.execute(request, cognito_access_token);
+          });
+          console.log('calendar stream started');
+        }
+        else
+          if (integrationAccount && slug.includes("gmail")) {
+            let request = {
+              "integration_account_id": integrationAccount.id,
+              "resource_type": "email",
+              "sync_full_content": false
+            }
+            setImmediate(() => {
+              this.streamService.execute(request, cognito_access_token);
+            });
+            console.log('email stream started');
+          }
     });
+
     return user;
   }
 
