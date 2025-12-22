@@ -4,11 +4,17 @@ import {
   Query,
   Res,
   BadRequestException,
+  UseGuards,
+  NotFoundException,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from '@application/auth/services/auth.service';
 import { Config } from '@common/util/config';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { CurrentUser } from '@common/decorators/current-user.decorator';
+import { User } from '@domain/models/user.model';
+import { UserResponseDto } from './dto/user-response.dto';
 
 @ApiTags('auth')
 @Controller({
@@ -19,6 +25,19 @@ export class AuthController {
   constructor(private authService: AuthService) { }
 
   @Get('callback')
+  @ApiOperation(
+    {
+      summary: 'Cognito Callback url to redirect to frontend',
+      description: 'Cognito Callback url to redirect to frontend while logging in using OAuth2.0',
+    })
+  @ApiResponse({
+    status: 200,
+    description: 'Callback url to redirect to frontend',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid input data',
+  })
   async callback(
     @Query('code') code: string,
     @Query('state') provider: string,
@@ -36,11 +55,25 @@ export class AuthController {
   }
 
   @Get('me')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get current user details', description: 'Get current user details' })
+  @ApiResponse({
+    status: 200,
+    description: 'User details',
+    type: UserResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
   async getMe(
-    @Res() res: Response,
-  ) {
-    return res.json({
-      message: 'Hello World!',
-    });
+    @CurrentUser('sub') userId: string,
+  ): Promise<UserResponseDto> {
+    const user = await this.authService.getMe(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 }
