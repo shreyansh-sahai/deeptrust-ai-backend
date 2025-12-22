@@ -30,6 +30,10 @@ export class UserRepository {
       data: {
         email,
         fullName,
+        metadata: {
+          isOnboarded: false,
+          onboardingStep: 0
+        },
       },
     });
 

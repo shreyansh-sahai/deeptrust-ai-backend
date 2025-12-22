@@ -15,9 +15,12 @@ import type { SyncProgressEvent } from './sync.service';
 import { StartSyncDto, ResourceType } from './dto/start-sync.dto';
 import { map } from 'rxjs/operators';
 
-@Controller('api/sync')
+@Controller({
+  path: 'sync',
+  version: '1',
+})
 export class SyncController {
-  constructor(private readonly syncService: SyncService) {}
+  constructor(private readonly syncService: SyncService) { }
 
   /**
    * Start a sync operation and stream progress via Server-Sent Events (SSE)

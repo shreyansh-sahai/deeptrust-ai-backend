@@ -40,4 +40,8 @@ export class Config {
   static get ENCRYPTION_KEY(): string {
     return 'change-this-to-a-secure-random-key-in-production'
   };
+
+  static get STREAM_API_URL(): string {
+    return 'https://data.dev.mydeeptrust.ai/api/sync/start';
+  };
 }
