@@ -7,6 +7,7 @@ import { ProfileModule } from '@api/controllers/profile/profile.module';
 import { OnboardingModule } from '@api/controllers/onboarding/onboarding.module';
 import { NetworkModule } from '@api/controllers/network/network.module';
 import { IntentModule } from '@api/controllers/intent/intent.module';
+import { ContactModule } from '@api/controllers/contact/contact.module';
 import { JwtModule } from '@nestjs/jwt';
 import { StreamService } from '@application/auth/services/streamService.service';
 
@@ -18,6 +19,7 @@ import { StreamService } from '@application/auth/services/streamService.service'
     OnboardingModule,
     NetworkModule,
     IntentModule,
+    ContactModule,
     JwtModule.register({
       global: true,
       secret: 'sJpPXkD+5fLJfph1z0yCqQmTsk+3e0A2tZT90pJ1mU0=',

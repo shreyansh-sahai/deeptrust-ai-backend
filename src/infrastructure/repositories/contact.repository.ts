@@ -73,4 +73,26 @@ export class ContactRepository {
             contact.photoUrl || undefined,
         ) : null;
     }
+
+    async findAllByUserId(userId: string): Promise<Contact[]> {
+        const userContacts = await this.prisma.userContact.findMany({
+            where: { userId },
+            include: { contact: true }
+        });
+
+        return userContacts.map(uc => new Contact(
+            uc.contact.id,
+            uc.contact.createdAt,
+            uc.contact.updatedAt,
+            uc.contact.firstName || undefined,
+            uc.contact.lastName || undefined,
+            uc.contact.displayName || undefined,
+            uc.contact.email || undefined,
+            uc.contact.phoneNumber || undefined,
+            uc.contact.organization || undefined,
+            uc.contact.jobTitle || undefined,
+            uc.contact.notes || undefined,
+            uc.contact.photoUrl || undefined,
+        ));
+    }
 }

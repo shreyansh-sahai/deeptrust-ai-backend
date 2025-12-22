@@ -1,51 +1,56 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { NetworkType, INetworkType } from '@domain/value-objects/network-type';
+import { UserContactRepository } from '@infrastructure/repositories/user-contact.repository';
 
 @Injectable()
 export class NetworkService {
+  constructor(private readonly userContactRepository: UserContactRepository) {}
+
   async saveNetwork(
     userId: string,
-    contactId: string,
+    contactIds: string[],
     networkType: string,
-    buckets?: string[],
-  ): Promise<{ message: string; data: any }> {
-    console.log('=== Save Network Request ===');
-    console.log('User ID:', userId);
-    console.log('Contact ID:', contactId);
-    console.log('Network Type:', networkType);
-    console.log('Buckets:', buckets);
-    console.log('Network type will be added to UserContact buckets array');
-    console.log('(stub - not saved to DB)');
+    isCustom: boolean,
+  ): Promise<{ message: string }> {
+    // 1. Validation
+    if (!isCustom) {
+      const allowedTypes = NetworkType.getAllNetworkTypes().map((t) => t.type);
+      if (!allowedTypes.includes(networkType)) {
+        throw new BadRequestException(`Invalid network type: ${networkType}`);
+      }
+    }
+
+    // 2. Update buckets in UserContact
+    await this.userContactRepository.updateNetworkBuckets(userId, contactIds, networkType);
 
     return {
-      message: 'Network saved successfully (stub)',
-      data: {
-        contactId,
-        networkType,
-        buckets: buckets || [],
-        updatedAt: new Date(),
-      },
+      message: 'Network updated successfully',
     };
   }
 
   async getNetworkTypes(): Promise<INetworkType[]> {
-    console.log('Fetching all network types');
-    const networkTypes = NetworkType.getAllNetworkTypes();
-    console.log(`Returning ${networkTypes.length} network types`);
-    return networkTypes;
+    return NetworkType.getAllNetworkTypes();
   }
 
-  async getBucketsByUserId(userId: string): Promise<string[]> {
-    console.log(`Fetching buckets for user: ${userId}`);
+  async getMyNetworks(userId: string): Promise<{ networkType: string; contactIds: string[] }[]> {
+    const userContacts = await this.userContactRepository.findAllByUserId(userId);
     
-    const mockBuckets = [
-      'executive-team',
-      'board-members',
-      'investors',
-      'key-clients',
-    ];
-    
-    console.log(`Returning ${mockBuckets.length} buckets (stub data)`);
-    return mockBuckets;
+    const networkMap = new Map<string, string[]>();
+
+    userContacts.forEach((uc) => {
+      uc.buckets.forEach((bucket) => {
+        if (!networkMap.has(bucket)) {
+          networkMap.set(bucket, []);
+        }
+        networkMap.get(bucket)!.push(uc.contactId);
+      });
+    });
+
+    const result: { networkType: string; contactIds: string[] }[] = [];
+    networkMap.forEach((contactIds, networkType) => {
+      result.push({ networkType, contactIds });
+    });
+
+    return result;
   }
 }

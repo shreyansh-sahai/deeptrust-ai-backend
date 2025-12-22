@@ -16,7 +16,7 @@ import {
 } from '@nestjs/swagger';
 import { NetworkService } from '@application/network/services/network.service';
 import { SaveNetworkDto } from './dto/save-network.dto';
-import { NetworkResponseDto } from './dto/network-response.dto';
+import { MyNetworkResponseDto } from './dto/my-network-response.dto';
 import { INetworkType } from '@domain/value-objects/network-type';
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
@@ -33,12 +33,11 @@ export class NetworkController {
 
   @Post('save')
   @UsePipes(new ValidationPipe({ transform: true }))
-  @ApiOperation({ summary: 'Save a network type to UserContact buckets' })
+  @ApiOperation({ summary: 'Save contacts to a network (bucket)' })
   @ApiBody({ type: SaveNetworkDto })
   @ApiResponse({
-    status: 201,
-    description: 'Network saved successfully',
-    type: NetworkResponseDto,
+    status: 200,
+    description: 'Network updated successfully',
   })
   @ApiResponse({
     status: 400,
@@ -47,15 +46,13 @@ export class NetworkController {
   async saveNetwork(
     @CurrentUser('sub') userId: string,
     @Body() dto: SaveNetworkDto,
-  ): Promise<NetworkResponseDto> {
-    const result = await this.networkService.saveNetwork(
+  ): Promise<{ message: string }> {
+    return await this.networkService.saveNetwork(
       userId,
-      dto.contactId,
+      dto.contactIds,
       dto.networkType,
-      dto.buckets,
+      dto.isCustom,
     );
-
-    return result;
   }
 
   @Get('get-network-types')
@@ -82,20 +79,16 @@ export class NetworkController {
     return await this.networkService.getNetworkTypes();
   }
 
-  @Get('my-buckets')
-  @ApiOperation({ summary: 'Get bucket list for the current user' })
+  @Get('my-networks')
+  @ApiOperation({ summary: 'Get grouped networks for the current user' })
   @ApiResponse({
     status: 200,
-    description: 'List of buckets for the user',
-    schema: {
-      type: 'array',
-      items: {
-        type: 'string',
-      },
-      example: ['executive-team', 'board-members', 'investors'],
-    },
+    description: 'Grouped list of networks and their associated contact IDs',
+    type: [MyNetworkResponseDto],
   })
-  async getMyBuckets(@CurrentUser('sub') userId: string): Promise<string[]> {
-    return await this.networkService.getBucketsByUserId(userId);
+  async getMyNetworks(
+    @CurrentUser('sub') userId: string,
+  ): Promise<MyNetworkResponseDto[]> {
+    return await this.networkService.getMyNetworks(userId);
   }
 }
