@@ -20,7 +20,6 @@ export class NetworkService {
     return {
       message: 'Network saved successfully (stub)',
       data: {
-        userId,
         contactId,
         networkType,
         buckets: buckets || [],

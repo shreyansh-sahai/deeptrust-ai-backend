@@ -8,12 +8,6 @@ export class IntentResponseDto {
   id: string;
 
   @ApiProperty({
-    description: 'The ID of the user who owns this intent',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  userId: string;
-
-  @ApiProperty({
     description: 'The title of the goal',
     example: 'Increase sales by 20%',
   })

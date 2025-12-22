@@ -2,12 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class ProfileResponseDto {
   @ApiProperty({
-    description: 'User ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  userId: string;
-
-  @ApiProperty({
     description: 'Professional headline',
     example: 'Senior Software Engineer | Full Stack Developer',
     required: false,
