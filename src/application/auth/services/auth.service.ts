@@ -39,8 +39,7 @@ export class AuthService {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       });
-      const { access_token, refresh_token, expires_in, id_token } =
-        response.data;
+      const { expires_in, id_token } = response.data;
 
       const userInfo = JwtUtil.decodeIdToken(id_token);
       if (!provider || provider === undefined)

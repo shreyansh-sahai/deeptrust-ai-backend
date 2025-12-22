@@ -3,7 +3,6 @@ import {
   Post,
   Get,
   Body,
-  Param,
   UsePipes,
   ValidationPipe,
   UseGuards,
@@ -13,7 +12,6 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBody,
-  ApiParam,
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { NetworkService } from '@application/network/services/network.service';
