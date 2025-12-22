@@ -26,6 +26,10 @@ export class AuthService {
     private readonly streamService: StreamService,
   ) { }
 
+  async getMe(userId: string) {
+    return await this.userRepository.findById(userId);
+  }
+
   async exchangeCodeForTokens(code: string, provider: string) {
     const tokenUrl = `${this.domain}/oauth2/token`;
 

@@ -25,6 +25,25 @@ export class UserRepository {
     );
   }
 
+  async findById(id: string): Promise<User | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+    });
+
+    if (!user) return null;
+
+    return new User(
+      user.id,
+      user.email,
+      user.createdAt,
+      user.updatedAt,
+      user.isActive,
+      user.fullName ?? undefined,
+      user.contactId ?? undefined,
+      user.metadata ?? undefined,
+    );
+  }
+
   async create(email: string, fullName?: string): Promise<User> {
     const user = await this.prisma.user.create({
       data: {
