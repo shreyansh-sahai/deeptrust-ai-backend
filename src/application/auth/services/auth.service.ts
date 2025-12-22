@@ -4,7 +4,6 @@ import axios from 'axios';
 import { Config } from '@common/util/config';
 import { JwtUtil } from '@common/util/jwt.util';
 import { CryptoUtil } from '@common/util/crypto.util';
-import { CryptoUtil } from '@common/util/crypto.util';
 import { UserRepository } from '@infrastructure/repositories/user.repository';
 import { IntegrationRepository } from '@infrastructure/repositories/integration.repository';
 import { IntegrationAccountRepository } from '@infrastructure/repositories/integration-account.repository';
@@ -22,7 +21,6 @@ export class AuthService {
     private readonly integrationRepository: IntegrationRepository,
     private readonly integrationAccountRepository: IntegrationAccountRepository,
     private readonly jwtService: JwtService,
-    private readonly contactRepository: ContactRepository,
     private readonly contactRepository: ContactRepository,
   ) { }
 
@@ -48,10 +46,6 @@ export class AuthService {
       provider = userInfo.provider;
 
       const tokenExpiry = JwtUtil.calculateTokenExpiry(expires_in);
-      // if (!provider || provider === undefined)
-      provider = userInfo.provider;
-
-      const tokenExpiry = JwtUtil.calculateTokenExpiry(expires_in);
 
       let scopes = await this.fetchTokenScopes(provider, userInfo.access_token);
 
@@ -82,49 +76,14 @@ export class AuthService {
         );
       }
 
-      let scopes = await this.fetchTokenScopes(provider, userInfo.access_token);
 
-      let user = await this.userRepository.findByEmail(userInfo.email);
-      if (user) {
-        await this.handleExistingUser(
-          user,
-          provider,
-          userInfo.sub,
-          userInfo.email,
-          userInfo.access_token || '',
-          userInfo.refresh_token || '',
-          tokenExpiry,
-          scopes,
-          userInfo
-        );
-      } else {
-        user = await this.handleNewUser(
-          userInfo.email,
-          userInfo.name,
-          provider,
-          userInfo.sub,
-          userInfo.access_token || '',
-          userInfo.refresh_token || '',
-          tokenExpiry,
-          scopes,
-          userInfo
-        );
-      }
 
       var sessionToken = await this.createSessionToken({
-        sub: user.id,
         sub: user.id,
         email: userInfo.email,
         provider: 'cognito',
       });
 
-      const code = JSON.stringify({
-        token: sessionToken,
-        isOnboarded: false,
-        onboardingStep: 1,
-      });
-
-      return code;
       const code = JSON.stringify({
         token: sessionToken,
         isOnboarded: false,
@@ -169,33 +128,9 @@ export class AuthService {
     }
   }
 
-  private async fetchTokenScopes(provider: string, accessToken?: string) {
-    if (accessToken != undefined) {
-      try {
-        if (provider === 'Google') {
-          const response = await axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${accessToken}`);
-          const scopes = response.data.scope.split(' ');
-          return scopes;
-        }
-        else if (provider === 'Microsoft') {
-          // const response = await axios.get('https://graph.microsoft.com/v1.0/me', {
-          //   headers: {
-          //     Authorization: `Bearer ${accessToken}`,
-          //   },
-          // });
-          const microsoftScope = 'Contacts.Read Mail.Read Calendars.Read';
-          const scopes = microsoftScope.split(' ');
-          return scopes;
-        }
-      }
-      catch (err: any) {
-        console.error('Token scope error:', err.response?.data || err.message);
-      }
-    }
-  }
+
 
   private async handleExistingUser(
-    user: User,
     user: User,
     provider: string,
     remoteProviderId: string,
@@ -269,72 +204,7 @@ export class AuthService {
       }
     });
 
-    if (!user.contactId) {
-      let contact = await this.contactRepository.findByEmail(remoteEmail);
-      if (!contact) {
-        contact = await this.contactRepository.create({
-          email: remoteEmail,
-          firstName: userInfo.given_name,
-          lastName: userInfo.family_name,
-          displayName: userInfo.name,
-          phoneNumber: userInfo.phone_number,
-          organization: userInfo.organization,
-          jobTitle: userInfo.job_title,
-          notes: userInfo.notes,
-          photoUrl: userInfo.picture,
-        });
-
-        await this.userRepository.update(user.id, {
-          contactId: contact.id,
-        });
-      }
-    }
-
-    scopes.forEach(async scope => {
-      const slug = provider + ' - ' + scope;
-      let integration = await this.integrationRepository.findBySlug(slug);
-
-      if (!integration) {
-        integration = await this.integrationRepository.create(
-          {
-            slug: slug,
-            name: slug,
-            provider: provider,
-            isGlobalEnabled: true,
-            requiredScopes: [scope],
-            authBaseUrl: '',
-            tokenUrl: '',
-          }
-        );
-      }
-
-      let integrationAccount = await this.integrationAccountRepository.findByUserAndIntegration(user.id, integration.id);
-      if (!integrationAccount) {
-        await this.integrationAccountRepository.create({
-          userId: user.id,
-          integrationId: integration.id,
-          remoteProviderId,
-          remoteEmail,
-          accessTokenEnc: CryptoUtil.encrypt(accessToken),
-          refreshTokenEnc: CryptoUtil.encrypt(refreshToken),
-          tokenExpiresAt: tokenExpiry,
-          scopesGranted: integration.requiredScopes,
-        });
-      }
-      else {
-        await this.integrationAccountRepository.update(integrationAccount.id, {
-          accessTokenEnc: CryptoUtil.encrypt(accessToken),
-          refreshTokenEnc: CryptoUtil.encrypt(refreshToken),
-          tokenExpiresAt: tokenExpiry,
-          scopesGranted: integration.requiredScopes,
-        });
-      }
-    });
   }
-
-
-
-
 
   private async handleNewUser(
     email: string,
@@ -346,72 +216,9 @@ export class AuthService {
     tokenExpiry: Date,
     scopes: string[],
     userInfo: any,
-    scopes: string[],
-    userInfo: any,
   ) {
     const user = await this.userRepository.create(email, fullName);
-    const user = await this.userRepository.create(email, fullName);
 
-    let contact = await this.contactRepository.findByEmail(email);
-    if (!contact) {
-      contact = await this.contactRepository.create({
-        email: email,
-        firstName: userInfo.given_name,
-        lastName: userInfo.family_name,
-        displayName: userInfo.name,
-        phoneNumber: userInfo.phone_number,
-        organization: userInfo.organization,
-        jobTitle: userInfo.job_title,
-        notes: userInfo.notes,
-        photoUrl: userInfo.picture,
-      });
-
-      await this.userRepository.update(user.id, {
-        contactId: contact.id,
-      });
-    }
-
-    scopes.forEach(async scope => {
-      const slug = provider + ' - ' + scope;
-      let integration = await this.integrationRepository.findBySlug(slug);
-
-      if (!integration) {
-        integration = await this.integrationRepository.create(
-          {
-            slug: slug,
-            name: slug,
-            provider: provider,
-            isGlobalEnabled: true,
-            requiredScopes: [scope],
-            authBaseUrl: '',
-            tokenUrl: '',
-          }
-        );
-      }
-
-      let integrationAccount = await this.integrationAccountRepository.findByUserAndIntegration(user.id, integration.id);
-      if (!integrationAccount) {
-        await this.integrationAccountRepository.create({
-          userId: user.id,
-          integrationId: integration.id,
-          remoteProviderId,
-          remoteEmail: email,
-          accessTokenEnc: CryptoUtil.encrypt(accessToken),
-          refreshTokenEnc: CryptoUtil.encrypt(refreshToken),
-          tokenExpiresAt: tokenExpiry,
-          scopesGranted: integration.requiredScopes,
-        });
-      }
-      else {
-        await this.integrationAccountRepository.update(integrationAccount.id, {
-          accessTokenEnc: CryptoUtil.encrypt(accessToken),
-          refreshTokenEnc: CryptoUtil.encrypt(refreshToken),
-          tokenExpiresAt: tokenExpiry,
-          scopesGranted: integration.requiredScopes,
-        });
-      }
-    });
-    return user;
     let contact = await this.contactRepository.findByEmail(email);
     if (!contact) {
       contact = await this.contactRepository.create({
