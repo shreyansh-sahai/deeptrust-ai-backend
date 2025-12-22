@@ -4,7 +4,6 @@ import { SyncModule } from '@api/sync/sync.module';
 import { AuthController } from '@api/controllers/auth/auth.controller';
 import { AuthService } from '@application/auth/services/auth.service';
 import { HealthModule } from '@api/health/health.module';
-import { IntentModule } from '@api/controllers/intent/intent.module';
 import { ProfileModule } from '@api/controllers/profile/profile.module';
 import { NetworkModule } from '@api/controllers/network/network.module';
 import { JwtModule } from '@nestjs/jwt';
@@ -15,7 +14,6 @@ import { StreamService } from '@application/auth/services/streamService.service'
     InfrastructureModule,
     SyncModule,
     HealthModule,
-    IntentModule,
     ProfileModule,
     NetworkModule,
     JwtModule.register({
