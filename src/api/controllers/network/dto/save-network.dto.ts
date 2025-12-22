@@ -1,17 +1,18 @@
-import { IsNotEmpty, IsString, IsOptional, IsArray } from 'class-validator';
+import { IsNotEmpty, IsString, IsBoolean, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SaveNetworkDto {
   @ApiProperty({
-    description: 'The ID of the contact',
-    example: '987e6543-e21b-12d3-a456-426614174999',
+    description: 'The list of contact IDs to assign to the network',
+    example: ['987e6543-e21b-12d3-a456-426614174999'],
   })
-  @IsString()
+  @IsArray()
+  @IsString({ each: true })
   @IsNotEmpty()
-  contactId: string;
+  contactIds: string[];
 
   @ApiProperty({
-    description: 'The network type (will be added to UserContact buckets array)',
+    description: 'The network type (bucket name)',
     example: 'executive-team',
   })
   @IsString()
@@ -19,12 +20,10 @@ export class SaveNetworkDto {
   networkType: string;
 
   @ApiProperty({
-    description: 'Optional array of additional bucket names',
-    example: ['professional', 'high-priority'],
-    required: false,
+    description: 'Whether it is a custom network type',
+    example: false,
   })
-  @IsArray()
-  @IsString({ each: true })
-  @IsOptional()
-  buckets?: string[];
+  @IsBoolean()
+  @IsNotEmpty()
+  isCustom: boolean;
 }

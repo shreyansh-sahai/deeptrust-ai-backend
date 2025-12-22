@@ -6,6 +6,7 @@ import { IntegrationAccountRepository } from './repositories/integration-account
 import { ContactRepository } from './repositories/contact.repository';
 import { IntentRepository } from './repositories/intent.repository';
 import { UserProfileRepository } from './repositories/user-profile.repository';
+import { UserContactRepository } from './repositories/user-contact.repository';
 
 @Module({
   imports: [PrismaModule],
@@ -16,6 +17,7 @@ import { UserProfileRepository } from './repositories/user-profile.repository';
     ContactRepository,
     IntentRepository,
     UserProfileRepository,
+    UserContactRepository,
   ],
   exports: [
     PrismaModule,
@@ -25,6 +27,7 @@ import { UserProfileRepository } from './repositories/user-profile.repository';
     ContactRepository,
     IntentRepository,
     UserProfileRepository,
+    UserContactRepository,
   ],
 })
 export class InfrastructureModule { }
