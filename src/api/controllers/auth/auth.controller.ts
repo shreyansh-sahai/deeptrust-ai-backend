@@ -8,8 +8,13 @@ import {
 import { Response } from 'express';
 import { AuthService } from '@application/auth/services/auth.service';
 import { Config } from '@common/util/config';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('auth')
+@ApiTags('auth')
+@Controller({
+  path: 'auth',
+  version: '1',
+})
 export class AuthController {
   constructor(private authService: AuthService) { }
 
@@ -28,5 +33,14 @@ export class AuthController {
     const encodedData = encodeURIComponent(data);
 
     return res.redirect(Config.FRONTEND_SUCCESS_URL + '?auth=success&data=' + encodedData);
+  }
+
+  @Get('me')
+  async getMe(
+    @Res() res: Response,
+  ) {
+    return res.json({
+      message: 'Hello World!',
+    });
   }
 }

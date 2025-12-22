@@ -8,12 +8,15 @@ import {
 import { PrismaHealthIndicator } from '@infrastructure/health/prisma-health.indicator';
 
 @ApiTags('health')
-@Controller('api/v1/health')
+@Controller({
+  path: 'health',
+  version: '1',
+})
 export class HealthController {
   constructor(
     private readonly health: HealthCheckService,
     private readonly prismaHealthIndicator: PrismaHealthIndicator,
-  ) {}
+  ) { }
 
   @Get()
   @ApiOperation({ summary: 'Basic health check for liveness probe' })
