@@ -4,7 +4,7 @@ import { UserRepository } from './repositories/user.repository';
 import { IntegrationRepository } from './repositories/integration.repository';
 import { IntegrationAccountRepository } from './repositories/integration-account.repository';
 import { ContactRepository } from './repositories/contact.repository';
-// import { IntentRepository } from './repositories/intent.repository';
+import { IntentRepository } from './repositories/intent.repository';
 
 @Module({
   imports: [PrismaModule],
@@ -13,7 +13,7 @@ import { ContactRepository } from './repositories/contact.repository';
     IntegrationRepository,
     IntegrationAccountRepository,
     ContactRepository,
-    // IntentRepository,
+    IntentRepository,
   ],
   exports: [
     PrismaModule,
@@ -21,7 +21,7 @@ import { ContactRepository } from './repositories/contact.repository';
     IntegrationRepository,
     IntegrationAccountRepository,
     ContactRepository,
-    // IntentRepository,
+    IntentRepository,
   ],
 })
 export class InfrastructureModule { }

@@ -40,6 +40,7 @@ export class IntentResponseDto {
   @ApiProperty({
     description: 'When the intent was last updated',
     example: '2024-01-16T14:20:00Z',
+    required: false,
   })
-  updatedAt: Date;
+  updatedAt?: Date;
 }
