@@ -88,4 +88,25 @@ export class UserRepository {
       user.metadata ?? undefined,
     );
   }
+
+  async updateUserOnboardingStep(
+    id: string,
+    data: { metadata?: any },
+  ): Promise<User> {
+    const user = await this.prisma.user.update({
+      where: { id },
+      data,
+    });
+
+    return new User(
+      user.id,
+      user.email,
+      user.createdAt,
+      user.updatedAt,
+      user.isActive,
+      user.fullName ?? undefined,
+      user.contactId ?? undefined,
+      user.metadata ?? undefined,
+    );
+  }
 }
