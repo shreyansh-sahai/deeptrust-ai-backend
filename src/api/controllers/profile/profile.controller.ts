@@ -2,10 +2,12 @@ import {
   Controller,
   Post,
   Put,
+  Get,
   Body,
   UsePipes,
   ValidationPipe,
   UseGuards,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -108,6 +110,42 @@ export class ProfileController {
       dto.mobileNumber,
       dto.linkedinUrl,
     );
+
+    return {
+      userId: profile.userId,
+      professionalHeadline: profile.professionalHeadline,
+      professionalBio: profile.professionalBio,
+      currentOrganization: profile.currentOrganization,
+      state: profile.state,
+      city: profile.city,
+      country: profile.country,
+      timezone: profile.timezone,
+      videoIntroductionURL: profile.videoIntroductionURL,
+      mobileNumber: profile.mobileNumber,
+      linkedinUrl: profile.linkedinUrl,
+      updatedAt: profile.updatedAt,
+    };
+  }
+
+  @Get('me')
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiResponse({
+    status: 200,
+    description: 'Profile retrieved successfully',
+    type: ProfileResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Profile not found',
+  })
+  async getProfile(
+    @CurrentUser('sub') userId: string,
+  ): Promise<ProfileResponseDto> {
+    const profile = await this.profileService.getProfileByUserId(userId);
+
+    if (!profile) {
+      throw new NotFoundException('Profile not found');
+    }
 
     return {
       userId: profile.userId,
