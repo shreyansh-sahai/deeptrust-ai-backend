@@ -21,6 +21,15 @@ export class AddProfileDto {
   professionalBio?: string;
 
   @ApiProperty({
+    description: 'Current organization of the user',
+    example: 'DeepTrust AI',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  currentOrganization?: string;
+
+  @ApiProperty({
     description: 'State where the user is located',
     example: 'California',
     required: false,

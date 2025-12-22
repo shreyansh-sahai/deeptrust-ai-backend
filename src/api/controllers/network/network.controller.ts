@@ -24,7 +24,10 @@ import { CurrentUser } from '@common/decorators/current-user.decorator';
 @ApiTags('network')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('api/network')
+@Controller({
+  path: 'network',
+  version: '1',
+})
 export class NetworkController {
   constructor(private readonly networkService: NetworkService) {}
 

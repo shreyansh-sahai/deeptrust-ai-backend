@@ -11,6 +11,7 @@ model User {
   integrationAccounts IntegrationAccount[]
   userContacts        UserContact[]
   networkUserIntents  NetworkUserIntent[]
+  profile             UserProfile?
 
   @@map("users")
 }

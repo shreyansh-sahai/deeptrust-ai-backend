@@ -29,8 +29,33 @@ model User {
   integrationAccounts IntegrationAccount[]
   userContacts        UserContact[]
   networkUserIntents  NetworkUserIntent[]
+  profile             UserProfile?
 
   @@map("users")
+}
+
+
+// ============================================
+// user_profile.prisma
+// ============================================
+
+model UserProfile {
+  userId               String   @id
+  professionalHeadline String?
+  professionalBio      String?
+  currentOrganization  String?
+  state               String?
+  city                String?
+  country             String?
+  timezone            String?
+  videoIntroductionURL String?
+  mobileNumber        String?
+  linkedinUrl         String?
+  updatedAt           DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
 }
 
 

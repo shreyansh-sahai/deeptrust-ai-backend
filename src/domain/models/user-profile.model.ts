@@ -2,6 +2,7 @@ export class UserProfile {
   userId: string;
   professionalHeadline?: string;
   professionalBio?: string;
+  currentOrganization?: string;
   state?: string;
   city?: string;
   country?: string;
@@ -16,6 +17,7 @@ export class UserProfile {
     updatedAt: Date,
     professionalHeadline?: string,
     professionalBio?: string,
+    currentOrganization?: string,
     state?: string,
     city?: string,
     country?: string,
@@ -27,6 +29,7 @@ export class UserProfile {
     this.userId = userId;
     this.professionalHeadline = professionalHeadline;
     this.professionalBio = professionalBio;
+    this.currentOrganization = currentOrganization;
     this.state = state;
     this.city = city;
     this.country = country;

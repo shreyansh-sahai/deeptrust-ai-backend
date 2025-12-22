@@ -28,7 +28,10 @@ import { CurrentUser } from '@common/decorators/current-user.decorator';
 @ApiTags('intents')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('api/intents')
+@Controller({
+  path: 'intents',
+  version: '1',
+})
 export class IntentController {
   constructor(private readonly intentService: IntentService) {}
 

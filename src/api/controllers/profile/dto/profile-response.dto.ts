@@ -22,6 +22,13 @@ export class ProfileResponseDto {
   professionalBio?: string;
 
   @ApiProperty({
+    description: 'Current organization',
+    example: 'DeepTrust AI',
+    required: false,
+  })
+  currentOrganization?: string;
+
+  @ApiProperty({
     description: 'State',
     example: 'California',
     required: false,
