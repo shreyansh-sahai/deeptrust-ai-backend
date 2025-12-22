@@ -14,6 +14,11 @@ async function bootstrap() {
     type: VersioningType.URI,
   });
 
+  app.enableCors({
+    origin: ['http://localhost:5173', 'https://staging.mydeeptrust.ai'],
+    credentials: true,
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
