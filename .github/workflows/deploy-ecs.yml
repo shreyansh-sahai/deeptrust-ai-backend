@@ -61,7 +61,7 @@ jobs:
           echo "Latest image tag found: $LATEST_TAG"
           echo "tag=$LATEST_TAG" >> $GITHUB_OUTPUT
 
-      # B. Assume dev account role (role chaining) before ECS operations
+      
       - name: Configure AWS credentials (Dev)
         uses: aws-actions/configure-aws-credentials@v4
         with:
