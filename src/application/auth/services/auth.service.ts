@@ -308,38 +308,53 @@ export class AuthService {
         });
       }
 
-      if (integrationAccount && slug.includes("contact")) {
+      if (integrationAccount && slug.toLowerCase().includes("contact")) {
         let request = {
           "integration_account_id": integrationAccount.id,
-          "resource_type": "contact",
+          "resource_type": "contacts",
           "sync_full_content": false
         }
-        setImmediate(() => {
-          this.streamService.execute(request, cognito_access_token);
+        await axios.post(Config.STREAM_API_URL, request, {
+          headers: {
+            Authorization: `Bearer ${cognito_access_token}`,
+            'Content-Type': 'application/json',
+          },
+          responseType: 'stream',
+          timeout: 0,
         });
         console.log('contact stream started');
       }
       else
-        if (integrationAccount && slug.includes("calendar")) {
+        if (integrationAccount && slug.toLowerCase().includes("calendar")) {
           let request = {
             "integration_account_id": integrationAccount.id,
             "resource_type": "calendar",
             "sync_full_content": false
           }
-          setImmediate(() => {
-            this.streamService.execute(request, cognito_access_token);
+          await axios.post(Config.STREAM_API_URL, request, {
+            headers: {
+              Authorization: `Bearer ${cognito_access_token}`,
+              'Content-Type': 'application/json',
+            },
+            responseType: 'stream',
+            timeout: 0,
           });
           console.log('calendar stream started');
         }
         else
-          if (integrationAccount && slug.includes("gmail")) {
+          if (integrationAccount && (slug.toLowerCase().includes("gmail") || slug.toLowerCase().includes("email"))) {
             let request = {
               "integration_account_id": integrationAccount.id,
               "resource_type": "email",
               "sync_full_content": false
             }
-            setImmediate(() => {
-              this.streamService.execute(request, cognito_access_token);
+            await axios.post(Config.STREAM_API_URL, request, {
+              headers: {
+                Authorization: `Bearer ${cognito_access_token}`,
+                'Content-Type': 'application/json',
+              },
+              responseType: 'stream',
+              timeout: 0,
             });
             console.log('email stream started');
           }
