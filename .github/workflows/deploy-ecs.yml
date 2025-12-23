@@ -1,0 +1,99 @@
+name: Deploy ECS Data Service
+
+on:
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  ECS_TASK_DEFINITION: dev-backend
+  ECS_CONTAINER_NAME: backend
+  ECS_SERVICE_NAME: dev-backend
+  ECS_CLUSTER: dev-main
+  ECR_REGISTRY: 652086758380.dkr.ecr.us-east-1.amazonaws.com
+  ECR_REPOSITORY_NAME: deeptrust-backend
+
+jobs:
+  deploy:
+    name: Deploy to ECS
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Fetch latest image tag from ECR
+        id: get-latest-tag
+        run: |
+          # Get the most recently pushed image tag (sorted by timestamp, most recent first)
+          # This gets the first tag from the most recently pushed image
+          LATEST_TAG=$(aws ecr describe-images \
+            --repository-name ${{ env.ECR_REPOSITORY_NAME }} \
+            --region ${{ env.AWS_REGION }} \
+            --query 'sort_by(imageDetails, &imagePushedAt)[-1].imageTags[0]' \
+            --output text)
+          
+          # Fallback: if no tag found, get the second tag or use a different approach
+          if [ -z "$LATEST_TAG" ] || [ "$LATEST_TAG" == "None" ]; then
+            echo "No tag found in first position, trying alternative method..."
+            # Get all tags from the most recent image
+            LATEST_TAG=$(aws ecr describe-images \
+              --repository-name ${{ env.ECR_REPOSITORY_NAME }} \
+              --region ${{ env.AWS_REGION }} \
+              --query 'sort_by(imageDetails, &imagePushedAt)[-1].imageTags' \
+              --output text | awk '{print $1}')
+          fi
+          
+          if [ -z "$LATEST_TAG" ] || [ "$LATEST_TAG" == "None" ]; then
+            echo "Error: Could not find any image tags in ECR repository"
+            exit 1
+          fi
+          
+          echo "Latest image tag found: $LATEST_TAG"
+          echo "tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+
+      # B. Assume dev account role (role chaining) before ECS operations
+      - name: Configure AWS credentials (Dev)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.DEV_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-chaining: true
+
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition ${{ env.ECS_TASK_DEFINITION }} \
+            --region ${{ env.AWS_REGION }} \
+            --query taskDefinition > task-definition.json
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1.1.2
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.ECS_CONTAINER_NAME }}
+          image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY_NAME }}:${{ steps.get-latest-tag.outputs.tag }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2.3.2
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE_NAME }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -f task-definition.json
+
