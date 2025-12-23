@@ -314,7 +314,7 @@ export class AuthService {
           "resource_type": "contacts",
           "sync_full_content": false
         }
-        await axios.post(Config.STREAM_API_URL, request, {
+        let response = await axios.post(Config.STREAM_API_URL, request, {
           headers: {
             Authorization: `Bearer ${cognito_access_token}`,
             'Content-Type': 'application/json',
@@ -322,7 +322,7 @@ export class AuthService {
           responseType: 'stream',
           timeout: 0,
         });
-        console.log('contact stream started');
+        console.log('contact stream started', response);
       }
       else
         if (integrationAccount && slug.toLowerCase().includes("calendar")) {
@@ -331,7 +331,7 @@ export class AuthService {
             "resource_type": "calendar",
             "sync_full_content": false
           }
-          await axios.post(Config.STREAM_API_URL, request, {
+          let response = await axios.post(Config.STREAM_API_URL, request, {
             headers: {
               Authorization: `Bearer ${cognito_access_token}`,
               'Content-Type': 'application/json',
@@ -339,7 +339,7 @@ export class AuthService {
             responseType: 'stream',
             timeout: 0,
           });
-          console.log('calendar stream started');
+          console.log('calendar stream started', response);
         }
         else
           if (integrationAccount && (slug.toLowerCase().includes("gmail") || slug.toLowerCase().includes("email"))) {
@@ -348,7 +348,7 @@ export class AuthService {
               "resource_type": "email",
               "sync_full_content": false
             }
-            await axios.post(Config.STREAM_API_URL, request, {
+            let response = await axios.post(Config.STREAM_API_URL, request, {
               headers: {
                 Authorization: `Bearer ${cognito_access_token}`,
                 'Content-Type': 'application/json',
@@ -356,7 +356,7 @@ export class AuthService {
               responseType: 'stream',
               timeout: 0,
             });
-            console.log('email stream started');
+            console.log('email stream started', response);
           }
     });
 
