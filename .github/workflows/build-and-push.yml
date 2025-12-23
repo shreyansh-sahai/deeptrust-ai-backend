@@ -10,7 +10,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: deeptrust-data
+  ECR_REPOSITORY: deeptrust-backend
 
 jobs:
   build-and-push:
