@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsBoolean, IsArray } from 'class-validator';
+import { IsNotEmpty, IsString, IsBoolean, IsArray, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SaveNetworkDto {
@@ -14,10 +14,11 @@ export class SaveNetworkDto {
   @ApiProperty({
     description: 'The network type (bucket name)',
     example: 'executive-team',
+    required: false,
   })
   @IsString()
-  @IsNotEmpty()
-  networkType: string;
+  @IsOptional()
+  networkType?: string;
 
   @ApiProperty({
     description: 'The network type name (used if it is custom)',

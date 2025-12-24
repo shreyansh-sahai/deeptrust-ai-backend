@@ -52,7 +52,7 @@ export class NetworkController {
     return await this.networkService.saveNetwork(
       userId,
       dto.contactIds,
-      dto.networkType,
+      dto.networkType || 'custom',
       dto.networkTypeName,
       dto.isCustom,
     );
@@ -95,7 +95,7 @@ export class NetworkController {
     return await this.networkService.getMyNetworks(userId);
   }
 
-  @Delete('')
+  @Delete('delete-network')
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiOperation({ summary: 'Delete a network type from all contacts' })
   @ApiBody({ type: DeleteNetworkDto })
