@@ -7,5 +7,6 @@ import { InfrastructureModule } from '@infrastructure/infrastructure.module';
   imports: [InfrastructureModule],
   controllers: [ProfileController],
   providers: [ProfileService],
+  exports: [ProfileService],
 })
-export class ProfileModule {}
+export class ProfileModule { }

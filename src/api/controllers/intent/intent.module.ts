@@ -7,5 +7,6 @@ import { InfrastructureModule } from '@infrastructure/infrastructure.module';
   imports: [InfrastructureModule],
   controllers: [IntentController],
   providers: [IntentService],
+  exports: [IntentService],
 })
-export class IntentModule {}
+export class IntentModule { }
