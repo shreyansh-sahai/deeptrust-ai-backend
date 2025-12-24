@@ -10,10 +10,17 @@ export class NetworkService {
     userId: string,
     contactIds: string[],
     networkType: string,
+    networkTypeName: string,
     isCustom: boolean,
   ): Promise<{ message: string }> {
     // 1. Validation
-    if (!isCustom) {
+    let bucketToSave = networkType;
+    if (isCustom) {
+      if (!networkTypeName) {
+        throw new BadRequestException('networkTypeName is required for custom network');
+      }
+      bucketToSave = networkTypeName;
+    } else {
       const allowedTypes = NetworkType.getAllNetworkTypes().map((t) => t.type);
       if (!allowedTypes.includes(networkType)) {
         throw new BadRequestException(`Invalid network type: ${networkType}`);
@@ -21,7 +28,7 @@ export class NetworkService {
     }
 
     // 2. Update buckets in UserContact
-    await this.userContactRepository.updateNetworkBuckets(userId, contactIds, networkType);
+    await this.userContactRepository.updateNetworkBuckets(userId, contactIds, bucketToSave);
 
     return {
       message: 'Network updated successfully',
@@ -32,7 +39,7 @@ export class NetworkService {
     return NetworkType.getAllNetworkTypes();
   }
 
-  async getMyNetworks(userId: string): Promise<{ networkType: string; contactIds: string[] }[]> {
+  async getMyNetworks(userId: string): Promise<{ networkType: string; networkTypeName: string; contactIds: string[] }[]> {
     const userContacts = await this.userContactRepository.findAllByUserId(userId);
     
     const networkMap = new Map<string, string[]>();
@@ -46,11 +53,34 @@ export class NetworkService {
       });
     });
 
-    const result: { networkType: string; contactIds: string[] }[] = [];
-    networkMap.forEach((contactIds, networkType) => {
-      result.push({ networkType, contactIds });
+    const result: { networkType: string; networkTypeName: string; contactIds: string[] }[] = [];
+    networkMap.forEach((contactIds, bucketValue) => {
+      const predefinedType = NetworkType.findTypeByValue(bucketValue);
+      if (predefinedType) {
+        result.push({
+          networkType: bucketValue,
+          networkTypeName: predefinedType.name,
+          contactIds,
+        });
+      } else {
+        result.push({
+          networkType: 'custom',
+          networkTypeName: bucketValue,
+          contactIds,
+        });
+      }
     });
 
     return result;
+  }
+
+  async deleteNetwork(userId: string, networkType: string, networkTypeName: string): Promise<{ message: string }> {
+    const bucketValueToRemove = networkType === 'custom' ? networkTypeName : networkType;
+    
+    await this.userContactRepository.removeFromAllBuckets(userId, bucketValueToRemove);
+
+    return {
+      message: 'Network removed successfully',
+    };
   }
 }

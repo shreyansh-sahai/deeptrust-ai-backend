@@ -79,4 +79,8 @@ export class NetworkType {
       NetworkType.MENTORS,
     ];
   }
+
+  static findTypeByValue(value: string): INetworkType | null {
+    return this.getAllNetworkTypes().find((t) => t.type === value) || null;
+  }
 }

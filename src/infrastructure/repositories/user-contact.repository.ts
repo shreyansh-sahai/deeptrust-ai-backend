@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 
 @Injectable()
@@ -13,20 +13,29 @@ export class UserContactRepository {
 
   async updateNetworkBuckets(userId: string, contactIds: string[], networkType: string) {
     // 1. Add networkType to buckets for the specified contacts
-    await this.prisma.userContact.updateMany({
-      where: {
-        userId,
-        contactId: { in: contactIds },
-        NOT: {
-          buckets: { has: networkType },
+    for (const contactId of contactIds) {
+      const uc = await this.prisma.userContact.findUnique({
+        where: {
+          userId_contactId: {
+            userId,
+            contactId,
+          },
         },
-      },
-      data: {
-        buckets: {
-          push: networkType,
-        },
-      },
-    });
+      });
+
+      if (!uc) {
+        throw new NotFoundException(`Contact ${contactId} is not associated with user ${userId}`);
+      } else if (!uc.buckets.includes(networkType)) {
+        await this.prisma.userContact.update({
+          where: { id: uc.id },
+          data: {
+            buckets: {
+              push: networkType,
+            },
+          },
+        });
+      }
+    }
 
     // 2. Remove networkType from buckets for contacts NOT in the list
     // Note: Prisma updateMany with array filter for 'has' and then removal is tricky.
@@ -48,6 +57,27 @@ export class UserContactRepository {
         data: {
           buckets: {
             set: uc.buckets.filter((b) => b !== networkType),
+          },
+        },
+      });
+    }
+  }
+
+  async removeFromAllBuckets(userId: string, bucketValue: string) {
+    const contactsWithBucket = await this.prisma.userContact.findMany({
+      where: {
+        userId,
+        buckets: { has: bucketValue },
+      },
+      select: { id: true, buckets: true },
+    });
+
+    for (const uc of contactsWithBucket) {
+      await this.prisma.userContact.update({
+        where: { id: uc.id },
+        data: {
+          buckets: {
+            set: uc.buckets.filter((b) => b !== bucketValue),
           },
         },
       });
