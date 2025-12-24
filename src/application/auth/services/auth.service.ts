@@ -31,6 +31,8 @@ export class AuthService {
     const user = await this.userRepository.findById(userId);
     if (user && user.contactId) {
       const contact = await this.contactRepository.findById(user.contactId);
+      let isOnboarded = user.metadata?.isOnboarded ?? false;
+      let onboardingStep = user.metadata?.onboardingStep ?? 0;
       if (contact) {
         return new UserResponseDto(
           contact.firstName,
@@ -38,6 +40,8 @@ export class AuthService {
           contact.email,
           contact.displayName,
           contact.photoUrl,
+          isOnboarded,
+          onboardingStep
         );
       }
       else {
@@ -45,6 +49,8 @@ export class AuthService {
           user.fullName,
           user.email,
           user.fullName,
+          isOnboarded,
+          onboardingStep
         );
       }
     }

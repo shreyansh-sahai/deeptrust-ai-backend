@@ -1,12 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
 
 export class UserResponseDto {
-    constructor(firstName?: string, lastName?: string, email?: string, fullName?: string, photoUrl?: string) {
+    constructor(firstName?: string, lastName?: string, email?: string, fullName?: string, photoUrl?: string, isOnboarded?: boolean, onboardingStep?: number) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.fullName = fullName;
         this.photoUrl = photoUrl;
+        this.isOnboarded = isOnboarded;
+        this.onboardingStep = onboardingStep;
     }
 
     @ApiProperty({
@@ -38,4 +40,16 @@ export class UserResponseDto {
         example: 'https://example.com/photo.jpg',
     })
     photoUrl?: string;
+
+    @ApiProperty({
+        description: 'Is Onboarded',
+        example: false,
+    })
+    isOnboarded?: boolean;
+
+    @ApiProperty({
+        description: 'Onboarding Step',
+        example: 1,
+    })
+    onboardingStep?: number;
 }

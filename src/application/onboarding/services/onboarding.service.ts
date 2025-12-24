@@ -2,7 +2,9 @@ import { IntentService } from "@application/intent/services/intent.service";
 import { Intent } from "@domain/models/intent.model";
 import { ProfileService } from "@application/profile/services/profile.service";
 import { UserRepository } from "@infrastructure/repositories/user.repository";
+import { Injectable } from "@nestjs/common";
 
+@Injectable()
 export class OnboardingService {
     constructor(
         private readonly intentService: IntentService,
