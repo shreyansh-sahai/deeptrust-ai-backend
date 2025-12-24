@@ -6,17 +6,19 @@ import {
   UsePipes,
   ValidationPipe,
   UseGuards,
+  Delete,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBody,
-  ApiBearerAuth,
+  ApiBearerAuth
 } from '@nestjs/swagger';
 import { NetworkService } from '@application/network/services/network.service';
 import { SaveNetworkDto } from './dto/save-network.dto';
 import { MyNetworkResponseDto } from './dto/my-network-response.dto';
+import { DeleteNetworkDto } from './dto/delete-network.dto';
 import { INetworkType } from '@domain/value-objects/network-type';
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
@@ -51,6 +53,7 @@ export class NetworkController {
       userId,
       dto.contactIds,
       dto.networkType,
+      dto.networkTypeName,
       dto.isCustom,
     );
   }
@@ -90,5 +93,24 @@ export class NetworkController {
     @CurrentUser('sub') userId: string,
   ): Promise<MyNetworkResponseDto[]> {
     return await this.networkService.getMyNetworks(userId);
+  }
+
+  @Delete('')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @ApiOperation({ summary: 'Delete a network type from all contacts' })
+  @ApiBody({ type: DeleteNetworkDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Network removed successfully',
+  })
+  async deleteNetwork(
+    @CurrentUser('sub') userId: string,
+    @Body() dto: DeleteNetworkDto,
+  ): Promise<{ message: string }> {
+    return await this.networkService.deleteNetwork(
+      userId,
+      dto.networkType,
+      dto.networkTypeName,
+    );
   }
 }

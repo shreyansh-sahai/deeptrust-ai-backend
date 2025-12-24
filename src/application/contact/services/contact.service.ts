@@ -7,6 +7,7 @@ export class ContactService {
   constructor(private readonly contactRepository: ContactRepository) {}
 
   async getContactsByUserId(userId: string): Promise<Contact[]> {
+    console.info('Fetching contacts for user: ', userId);
     return await this.contactRepository.findAllByUserId(userId);
   }
 }

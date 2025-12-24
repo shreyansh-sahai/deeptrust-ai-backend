@@ -29,7 +29,7 @@ model IntegrationAccountContact {
 // Unique contacts table: Deduplicated contacts, unique by email
 model Contact {
   id                String   @id @default(uuid())
-  email             String   @unique // Unique constraint on email
+  email             String?   @unique // Unique constraint on email
   firstName         String?
   lastName          String?
   displayName       String?

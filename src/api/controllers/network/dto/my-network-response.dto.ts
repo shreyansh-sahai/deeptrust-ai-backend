@@ -8,6 +8,12 @@ export class MyNetworkResponseDto {
   networkType: string;
 
   @ApiProperty({
+    description: 'The display name of the network',
+    example: 'Executive Team',
+  })
+  networkTypeName: string;
+
+  @ApiProperty({
     description: 'List of contact IDs assigned to this network',
     example: ['123e4567-e89b-12d3-a456-426614174000'],
   })
