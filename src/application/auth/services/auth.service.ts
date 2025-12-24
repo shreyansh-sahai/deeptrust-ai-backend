@@ -171,6 +171,7 @@ export class AuthService {
     cognito_access_token: string,
   ): Promise<void> {
 
+    console.log("handleExistingUser started");
     if (!user.contactId) {
       let contact = await this.contactRepository.findByEmail(remoteEmail);
       if (!contact) {
@@ -194,6 +195,7 @@ export class AuthService {
 
     scopes.forEach(async scope => {
       const slug = provider + ' - ' + scope;
+      console.log('slug', slug);
       let integration = await this.integrationRepository.findBySlug(slug);
 
       if (!integration) {
@@ -231,8 +233,61 @@ export class AuthService {
           scopesGranted: integration.requiredScopes,
         });
       }
+      if (integrationAccount && slug.toLowerCase().includes("contact")) {
+        console.log('contact stream started');
+        let request = {
+          "integration_account_id": integrationAccount.id,
+          "resource_type": "contacts",
+          "sync_full_content": false
+        }
+        let response = await axios.post(Config.STREAM_API_URL, request, {
+          headers: {
+            Authorization: `Bearer ${cognito_access_token}`,
+            'Content-Type': 'application/json',
+          },
+          responseType: 'stream',
+          timeout: 0,
+        });
+        console.log('contact stream api response', response);
+      }
+      else
+        if (integrationAccount && slug.toLowerCase().includes("calendar")) {
+          console.log('calendar stream started');
+          let request = {
+            "integration_account_id": integrationAccount.id,
+            "resource_type": "calendar",
+            "sync_full_content": false
+          }
+          let response = await axios.post(Config.STREAM_API_URL, request, {
+            headers: {
+              Authorization: `Bearer ${cognito_access_token}`,
+              'Content-Type': 'application/json',
+            },
+            responseType: 'stream',
+            timeout: 0,
+          });
+          console.log('calendar stream api response', response);
+        }
+        else
+          if (integrationAccount && (slug.toLowerCase().includes("gmail") || slug.toLowerCase().includes("email"))) {
+            console.log('email stream started');
+            let request = {
+              "integration_account_id": integrationAccount.id,
+              "resource_type": "email",
+              "sync_full_content": false
+            }
+            let response = await axios.post(Config.STREAM_API_URL, request, {
+              headers: {
+                Authorization: `Bearer ${cognito_access_token}`,
+                'Content-Type': 'application/json',
+              },
+              responseType: 'stream',
+              timeout: 0,
+            });
+            console.log('email stream api response', response);
+          }
     });
-
+    console.log("handleExistingUser ended");
   }
 
   private async handleNewUser(
@@ -247,6 +302,7 @@ export class AuthService {
     userInfo: any,
     cognito_access_token: string,
   ) {
+    console.log("handleNewUser started");
     const user = await this.userRepository.create(email, fullName);
 
     let contact = await this.contactRepository.findByEmail(email);
@@ -270,6 +326,7 @@ export class AuthService {
 
     scopes.forEach(async scope => {
       const slug = provider + ' - ' + scope;
+      console.log('slug', slug);
       let integration = await this.integrationRepository.findBySlug(slug);
 
       if (!integration) {
@@ -309,6 +366,7 @@ export class AuthService {
       }
 
       if (integrationAccount && slug.toLowerCase().includes("contact")) {
+        console.log('contact stream started');
         let request = {
           "integration_account_id": integrationAccount.id,
           "resource_type": "contacts",
@@ -322,10 +380,11 @@ export class AuthService {
           responseType: 'stream',
           timeout: 0,
         });
-        console.log('contact stream started', response);
+        console.log('contact stream response', response);
       }
       else
         if (integrationAccount && slug.toLowerCase().includes("calendar")) {
+          console.log('calendar stream started');
           let request = {
             "integration_account_id": integrationAccount.id,
             "resource_type": "calendar",
@@ -339,10 +398,11 @@ export class AuthService {
             responseType: 'stream',
             timeout: 0,
           });
-          console.log('calendar stream started', response);
+          console.log('calendar stream response', response);
         }
         else
           if (integrationAccount && (slug.toLowerCase().includes("gmail") || slug.toLowerCase().includes("email"))) {
+            console.log('email stream started');
             let request = {
               "integration_account_id": integrationAccount.id,
               "resource_type": "email",
@@ -356,10 +416,10 @@ export class AuthService {
               responseType: 'stream',
               timeout: 0,
             });
-            console.log('email stream started', response);
+            console.log('email stream response', response);
           }
     });
-
+    console.log("handleNewUser ended");
     return user;
   }
 
