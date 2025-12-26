@@ -10,6 +10,7 @@ export class UserProfile {
   videoIntroductionURL?: string;
   mobileNumber?: string;
   linkedinUrl?: string;
+  professionalExperience?: any[];
   updatedAt: Date;
 
   constructor(
@@ -25,6 +26,7 @@ export class UserProfile {
     videoIntroductionURL?: string,
     mobileNumber?: string,
     linkedinUrl?: string,
+    professionalExperience?: any[],
   ) {
     this.userId = userId;
     this.professionalHeadline = professionalHeadline;
@@ -37,6 +39,7 @@ export class UserProfile {
     this.videoIntroductionURL = videoIntroductionURL;
     this.mobileNumber = mobileNumber;
     this.linkedinUrl = linkedinUrl;
+    this.professionalExperience = professionalExperience;
     this.updatedAt = updatedAt;
   }
 }
