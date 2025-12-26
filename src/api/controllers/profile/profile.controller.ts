@@ -20,6 +20,7 @@ import { ProfileService } from '@application/profile/services/profile.service';
 import { AddProfileDto } from './dto/add-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ProfileResponseDto } from './dto/profile-response.dto';
+import { SaveWorkExperienceDto, WorkExperienceItemDto } from './dto/work-experience.dto';
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
 
@@ -158,5 +159,34 @@ export class ProfileController {
       linkedinUrl: profile.linkedinUrl,
       updatedAt: profile.updatedAt,
     };
+  }
+
+  @Post('work-ex/save')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @ApiOperation({ summary: 'Save or update user work experience' })
+  @ApiBody({ type: SaveWorkExperienceDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Work experience saved successfully',
+  })
+  async saveWorkExperience(
+    @CurrentUser('sub') userId: string,
+    @Body() dto: SaveWorkExperienceDto,
+  ): Promise<any> {
+    await this.profileService.saveWorkExperience(userId, dto.experience);
+    return { message: 'Work experience saved successfully' };
+  }
+
+  @Get('work-ex/get')
+  @ApiOperation({ summary: 'Get user work experience' })
+  @ApiResponse({
+    status: 200,
+    description: 'Work experience retrieved successfully',
+    type: [WorkExperienceItemDto],
+  })
+  async getWorkExperience(
+    @CurrentUser('sub') userId: string,
+  ): Promise<WorkExperienceItemDto[]> {
+    return await this.profileService.getWorkExperience(userId);
   }
 }

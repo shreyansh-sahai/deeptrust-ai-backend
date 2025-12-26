@@ -73,4 +73,34 @@ export class ProfileService {
   async getProfileByUserId(userId: string): Promise<UserProfile | null> {
     return await this.profileRepository.findByUserId(userId);
   }
+
+  async saveWorkExperience(
+    userId: string,
+    experience: any[],
+  ): Promise<UserProfile> {
+    const existingProfile = await this.profileRepository.findByUserId(userId);
+
+    const profile = new UserProfile(
+      userId,
+      new Date(),
+      existingProfile?.professionalHeadline,
+      existingProfile?.professionalBio,
+      existingProfile?.currentOrganization,
+      existingProfile?.state,
+      existingProfile?.city,
+      existingProfile?.country,
+      existingProfile?.timezone,
+      existingProfile?.videoIntroductionURL,
+      existingProfile?.mobileNumber,
+      existingProfile?.linkedinUrl,
+      experience,
+    );
+
+    return await this.profileRepository.save(profile);
+  }
+
+  async getWorkExperience(userId: string): Promise<any[]> {
+    const profile = await this.profileRepository.findByUserId(userId);
+    return profile?.professionalExperience || [];
+  }
 }

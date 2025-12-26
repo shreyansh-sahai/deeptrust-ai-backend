@@ -26,6 +26,7 @@ export class UserProfileRepository {
       profile.videoIntroductionURL ?? undefined,
       profile.mobileNumber ?? undefined,
       profile.linkedinUrl ?? undefined,
+      (profile.professionalExperience as any[]) ?? [],
     );
   }
 
@@ -42,6 +43,7 @@ export class UserProfileRepository {
       videoIntroductionURL: profile.videoIntroductionURL,
       mobileNumber: profile.mobileNumber,
       linkedinUrl: profile.linkedinUrl,
+      professionalExperience: profile.professionalExperience,
     };
 
     const result = await this.prisma.userProfile.upsert({
@@ -63,6 +65,7 @@ export class UserProfileRepository {
       result.videoIntroductionURL ?? undefined,
       result.mobileNumber ?? undefined,
       result.linkedinUrl ?? undefined,
+      (result.professionalExperience as any[]) ?? [],
     );
   }
 }
