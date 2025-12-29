@@ -31,6 +31,7 @@ model User {
   networkUserIntents  NetworkUserIntent[]
   profile             UserProfile?
   dtInvisibilityProcesses DTInvisibilityProcesses?
+  identities        UserIdentity[]
 
   @@map("users")
 }
@@ -60,6 +61,25 @@ model UserProfile {
   @@map("user_profiles")
 }
 
+
+// ============================================
+// user_identity.prisma
+// ============================================
+
+model UserIdentity {
+  id        String   @id @default(uuid())
+  userId    String
+  identity  Json     @default("{}")
+  created_at DateTime @default(now())
+  updated_at DateTime?
+  isDeleted Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isDeleted])
+  @@map("user_identities")
+}
 
 // ============================================
 // integration.prisma

@@ -16,6 +16,7 @@ const schemaFiles = [
   'base.prisma',
   'user.prisma',
   'user_profile.prisma',
+  'user_identity.prisma',
   'integration.prisma',
   'sync.prisma',
   'contact.prisma',
