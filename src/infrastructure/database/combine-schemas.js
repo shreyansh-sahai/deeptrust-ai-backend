@@ -22,6 +22,7 @@ const schemaFiles = [
   'email.prisma',
   'calendar.prisma',
   'network_user_intent.prisma',
+  'invisibility.prisma',
 ];
 
 let combinedContent = '';
@@ -30,7 +31,7 @@ console.log('Combining Prisma schemas...');
 
 schemaFiles.forEach((file) => {
   const filePath = path.join(schemasDir, file);
-  
+
   if (!fs.existsSync(filePath)) {
     console.warn(`Warning: ${file} not found, skipping...`);
     return;
@@ -42,7 +43,7 @@ schemaFiles.forEach((file) => {
   combinedContent += `// ============================================\n\n`;
   combinedContent += content;
   combinedContent += `\n\n`;
-  
+
   console.log(`✓ Added ${file}`);
 });
 
