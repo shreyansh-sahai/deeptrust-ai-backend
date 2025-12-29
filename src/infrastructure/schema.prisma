@@ -393,6 +393,7 @@ model NetworkUserIntent {
   intent_description String
   metadata           Json      @default("{}")
   voice_file_link    String?
+  embedding          Unsupported("vector(1536)")?
   created_at         DateTime  @default(now())
   updated_at         DateTime?
   isDeleted          Boolean   @default(false)

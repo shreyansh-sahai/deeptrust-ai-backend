@@ -4,7 +4,7 @@ import { Intent } from '@domain/models/intent.model';
 
 @Injectable()
 export class IntentRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async create(
     userId: string,
@@ -33,6 +33,43 @@ export class IntentRepository {
       intent.updated_at ?? undefined,
       intent.voice_file_link,
       intent.isDeleted,
+    );
+  }
+
+  async createWithvector(
+    userId: string,
+    goalTitle: string,
+    goalDescription: string,
+    metadata: Record<string, any>,
+    voiceFileLink?: string | null,
+    vector?: number[],
+  ): Promise<Intent> {
+    const vectorString = `[${vector?.join(',')}]`;
+    const result = await this.prisma.$queryRaw<{ id: string }[]>`
+      INSERT INTO "network_user_intents" (
+        id, "userId", "intent", "intent_description", metadata, "embedding", voice_file_link
+      ) VALUES (
+        gen_random_uuid(), 
+        ${userId}, 
+        ${goalTitle}, 
+        ${goalDescription}, 
+        ${metadata}::jsonb, 
+        ${vectorString}::vector, 
+        ${voiceFileLink}
+      )
+      RETURNING id;
+    `;
+
+    return new Intent(
+      result[0].id,
+      userId,
+      goalTitle,
+      goalDescription,
+      metadata,
+      new Date(),
+      undefined,
+      voiceFileLink,
+      false,
     );
   }
 

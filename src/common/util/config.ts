@@ -44,4 +44,8 @@ export class Config {
   static get STREAM_API_URL(): string {
     return 'https://data.dev.mydeeptrust.ai/api/sync/start';
   };
+
+  static get OPENAI_API_KEY(): string {
+    return this.get('OPENAI_API_KEY');
+  }
 }

@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { Intent } from '@domain/models/intent.model';
 import { IntentRepository } from '@infrastructure/repositories/intent.repository';
+import { EmbedService } from '@application/network_analyser/services/embed.service';
 
 @Injectable()
 export class IntentService {
-  constructor(private readonly intentRepository: IntentRepository) {}
+  constructor(
+    private readonly intentRepository: IntentRepository,
+    private readonly embedService: EmbedService) { }
 
   async createIntent(
     userId: string,
@@ -13,12 +16,19 @@ export class IntentService {
     metadata: Record<string, any>,
     voiceFileLink?: string | null,
   ): Promise<Intent> {
-    const intent = await this.intentRepository.create(
+
+    let goals = metadata;
+    goals["intent"] = goalTitle;
+    goals["intent_description"] = goalDescription;
+    const vector = await this.embedService.getEmbedding(JSON.stringify(goals));
+
+    const intent = await this.intentRepository.createWithvector(
       userId,
       goalTitle,
       goalDescription,
       metadata,
       voiceFileLink,
+      vector,
     );
 
     return intent;
