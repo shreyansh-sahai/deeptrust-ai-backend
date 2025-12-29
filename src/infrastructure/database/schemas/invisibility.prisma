@@ -1,0 +1,28 @@
+// ============================================
+// invisibility.prisma
+// ============================================
+
+model DTInvisibilityProcesses {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  lastProcessedAt DateTime?
+  status          String   @default("IDLE") // 'IDLE', 'RUNNING'
+  lockedAt        DateTime?
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id])
+  logs            DTInvisibilityProcessLog[]
+
+  @@map("dt_invisibility_processes")
+}
+
+model DTInvisibilityProcessLog {
+  id                      String   @id @default(uuid())
+  dtInvisibilityProcessId String
+  status                  String   // 'SUCCESS', 'FAILED'
+  metrics                 Json     @default("{}") // {emails: 50, events: 10}
+  error                   String?
+  createdAt               DateTime @default(now())
+
+  dtInvisibilityProcess   DTInvisibilityProcesses @relation(fields: [dtInvisibilityProcessId], references: [id])
+  @@map("dt_invisibility_process_logs")
+}

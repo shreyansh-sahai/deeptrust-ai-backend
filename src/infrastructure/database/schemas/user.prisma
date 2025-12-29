@@ -12,6 +12,7 @@ model User {
   userContacts        UserContact[]
   networkUserIntents  NetworkUserIntent[]
   profile             UserProfile?
+  dtInvisibilityProcesses DTInvisibilityProcesses?
 
   @@map("users")
 }
