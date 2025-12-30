@@ -41,15 +41,29 @@ export class IntentService {
     metadata?: Record<string, any>,
     voiceFileLink?: string | null,
   ): Promise<Intent> {
-    const intent = await this.intentRepository.update(
+    const intent = await this.intentRepository.findById(intentId);
+    if (!intent) {
+      throw new Error(`Intent with ID ${intentId} not found`);
+    }
+    if (!goalTitle || !goalDescription) {
+      throw new Error('Goal title and description are required');
+    }
+
+    let goals = metadata ?? intent.metadata;
+    goals["intent"] = goalTitle;
+    goals["intent_description"] = goalDescription;
+    const vector = await this.embedService.getEmbedding(JSON.stringify(goals));
+
+    const updatedIntent = await this.intentRepository.update(
       intentId,
       goalTitle,
       goalDescription,
-      metadata,
+      metadata ?? intent.metadata,
       voiceFileLink,
+      vector,
     );
 
-    return intent;
+    return updatedIntent;
   }
 
   async deleteIntent(intentId: string): Promise<{ success: boolean; message: string }> {

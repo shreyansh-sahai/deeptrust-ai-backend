@@ -67,12 +67,13 @@ model UserProfile {
 // ============================================
 
 model UserIdentity {
-  id        String   @id @default(uuid())
-  userId    String
-  identity  Json     @default("{}")
-  created_at DateTime @default(now())
-  updated_at DateTime?
-  isDeleted Boolean  @default(false)
+  id          String   @id @default(uuid())
+  userId      String
+  identity    Json     @default("{}")
+  embedding   Unsupported("vector(1536)")?
+  created_at  DateTime @default(now())
+  updated_at  DateTime?
+  isDeleted   Boolean  @default(false)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

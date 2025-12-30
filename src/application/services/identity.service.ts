@@ -1,13 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserIdentityRepository } from '@infrastructure/repositories/user-identity.repository';
 import { UserIdentity } from '@domain/models/user-identity.model';
+import { EmbedService } from '@application/network_analyser/services/embed.service';
 
 @Injectable()
 export class IdentityService {
-  constructor(private readonly repo: UserIdentityRepository) {}
+  constructor(private readonly repo: UserIdentityRepository, private readonly embedService: EmbedService) { }
 
   async addIdentity(userId: string, identity: Record<string, any>): Promise<UserIdentity> {
-    return this.repo.create(userId, identity);
+    const embedding = await this.embedService.getEmbedding(JSON.stringify(identity));
+    return this.repo.create(userId, identity, embedding);
   }
 
   async updateIdentity(userId: string, identityId: string, identityUpdates: Record<string, any>): Promise<UserIdentity> {
@@ -22,7 +24,8 @@ export class IdentityService {
     };
 
     try {
-      return await this.repo.update(userId, identityId, updatedIdentity);
+      const embedding = await this.embedService.getEmbedding(JSON.stringify(identityUpdates));
+      return await this.repo.update(userId, identityId, updatedIdentity, embedding);
     } catch (e) {
       throw new NotFoundException('Identity not found or access denied');
     }

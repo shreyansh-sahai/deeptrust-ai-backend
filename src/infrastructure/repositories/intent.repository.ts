@@ -126,6 +126,7 @@ export class IntentRepository {
     goalDescription?: string,
     metadata?: Record<string, any>,
     voiceFileLink?: string | null,
+    vector?: number[],
   ): Promise<Intent> {
     const intent = await this.prisma.networkUserIntent.update({
       where: { id },
@@ -137,6 +138,15 @@ export class IntentRepository {
         updated_at: new Date(),
       },
     });
+
+    if (vector) {
+      const vectorString = `[${vector.join(',')}]`;
+      await this.prisma.$executeRaw`
+        UPDATE "network_user_intents"
+        SET "embedding" = ${vectorString}::vector
+        WHERE "id" = ${id};
+      `;
+    }
 
     return new Intent(
       intent.id,
