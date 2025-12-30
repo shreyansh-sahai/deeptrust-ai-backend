@@ -269,6 +269,8 @@ model UserContact {
   buckets           String[] // Array of bucket names
   featureTags       String[] // Array of feature tags
   recencyScore      Float     @default(0)
+  consistencyScore  Float     @default(0)
+  symmetryRatio     Float     @default(1.0)
   lastInteractionAt DateTime?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
