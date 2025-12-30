@@ -4,7 +4,7 @@ import { UserProfile } from '@domain/models/user-profile.model';
 
 @Injectable()
 export class UserProfileRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async findByUserId(userId: string): Promise<UserProfile | null> {
     const profile = await this.prisma.userProfile.findUnique({

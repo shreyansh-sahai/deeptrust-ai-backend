@@ -72,7 +72,7 @@ export class AuthService {
         },
       });
       const { access_token, expires_in, id_token } = response.data;
-
+      console.log(id_token);
       const userInfo = JwtUtil.decodeIdToken(id_token);
       // if (!provider || provider === undefined)
       provider = userInfo.provider;

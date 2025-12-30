@@ -8,6 +8,7 @@ export class Intent {
   createdAt: Date;
   updatedAt?: Date;
   isDeleted: boolean;
+  embedding?: string;
 
   constructor(
     id: string,
@@ -18,6 +19,7 @@ export class Intent {
     createdAt: Date,
     updatedAt?: Date,
     voiceFileLink?: string | null,
+    embedding?: string,
     isDeleted: boolean = false,
   ) {
     this.id = id;
@@ -29,5 +31,6 @@ export class Intent {
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
     this.isDeleted = isDeleted;
+    this.embedding = embedding;
   }
 }

@@ -1,13 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserIdentityRepository } from '@infrastructure/repositories/user-identity.repository';
 import { UserIdentity } from '@domain/models/user-identity.model';
+import { EmbedService } from '@application/network_analyser/services/embed.service';
 
 @Injectable()
 export class IdentityService {
-  constructor(private readonly repo: UserIdentityRepository) {}
+  constructor(private readonly repo: UserIdentityRepository, private readonly embedService: EmbedService) { }
 
   async addIdentity(userId: string, identity: Record<string, any>): Promise<UserIdentity> {
-    return this.repo.create(userId, identity);
+    const flattenJsonToEmbedding = await this.embedService.flattenJsonToEmbedding(identity);
+    const embedding = await this.embedService.getEmbedding(flattenJsonToEmbedding);
+    return this.repo.create(userId, identity, embedding);
   }
 
   async updateIdentity(userId: string, identityId: string, identityUpdates: Record<string, any>): Promise<UserIdentity> {
@@ -22,7 +25,9 @@ export class IdentityService {
     };
 
     try {
-      return await this.repo.update(userId, identityId, updatedIdentity);
+      const flattenJsonToEmbedding = await this.embedService.flattenJsonToEmbedding(identityUpdates);
+      const embedding = await this.embedService.getEmbedding(flattenJsonToEmbedding);
+      return await this.repo.update(userId, identityId, updatedIdentity, embedding);
     } catch (e) {
       throw new NotFoundException('Identity not found or access denied');
     }
@@ -42,5 +47,9 @@ export class IdentityService {
 
   async myIdentities(userId: string): Promise<UserIdentity[]> {
     return this.repo.findByUserId(userId);
+  }
+
+  async networkAnalyser(userId: string, query: string): Promise<{ id: string, userId: string, metadata: string, distance: number }[]> {
+    return this.repo.networkAnalyser(userId, query);
   }
 }

@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { Intent } from '@domain/models/intent.model';
 import { IntentRepository } from '@infrastructure/repositories/intent.repository';
+import { EmbedService } from '@application/network_analyser/services/embed.service';
 
 @Injectable()
 export class IntentService {
-  constructor(private readonly intentRepository: IntentRepository) {}
+  constructor(
+    private readonly intentRepository: IntentRepository,
+    private readonly embedService: EmbedService) { }
 
   async createIntent(
     userId: string,
@@ -13,12 +16,20 @@ export class IntentService {
     metadata: Record<string, any>,
     voiceFileLink?: string | null,
   ): Promise<Intent> {
-    const intent = await this.intentRepository.create(
+
+    let goals = metadata;
+    goals["intent"] = goalTitle;
+    goals["intent_description"] = goalDescription;
+    const flattenJsonToEmbedding = await this.embedService.flattenJsonToEmbedding(goals);
+    const vector = await this.embedService.getEmbedding(flattenJsonToEmbedding);
+
+    const intent = await this.intentRepository.createWithvector(
       userId,
       goalTitle,
       goalDescription,
       metadata,
       voiceFileLink,
+      vector,
     );
 
     return intent;
@@ -31,15 +42,31 @@ export class IntentService {
     metadata?: Record<string, any>,
     voiceFileLink?: string | null,
   ): Promise<Intent> {
-    const intent = await this.intentRepository.update(
+    const intent = await this.intentRepository.findById(intentId);
+    if (!intent) {
+      throw new Error(`Intent with ID ${intentId} not found`);
+    }
+    if (!goalTitle || !goalDescription) {
+      throw new Error('Goal title and description are required');
+    }
+
+    let goals = metadata ?? intent.metadata;
+    goals["intent"] = goalTitle;
+    goals["intent_description"] = goalDescription;
+
+    const flattenJsonToEmbedding = await this.embedService.flattenJsonToEmbedding(goals);
+    const vector = await this.embedService.getEmbedding(flattenJsonToEmbedding);
+
+    const updatedIntent = await this.intentRepository.update(
       intentId,
       goalTitle,
       goalDescription,
-      metadata,
+      metadata ?? intent.metadata,
       voiceFileLink,
+      vector,
     );
 
-    return intent;
+    return updatedIntent;
   }
 
   async deleteIntent(intentId: string): Promise<{ success: boolean; message: string }> {

@@ -4,7 +4,7 @@ import { Intent } from '@domain/models/intent.model';
 
 @Injectable()
 export class IntentRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async create(
     userId: string,
@@ -32,16 +32,59 @@ export class IntentRepository {
       intent.created_at,
       intent.updated_at ?? undefined,
       intent.voice_file_link,
+      undefined,
       intent.isDeleted,
     );
   }
 
-  async findById(id: string): Promise<Intent | null> {
-    const intent = await this.prisma.networkUserIntent.findUnique({
-      where: { id, isDeleted: false },
-    });
+  async createWithvector(
+    userId: string,
+    goalTitle: string,
+    goalDescription: string,
+    metadata: Record<string, any>,
+    voiceFileLink?: string | null,
+    vector?: number[],
+  ): Promise<Intent> {
+    const vectorString = `[${vector?.join(',')}]`;
+    const result = await this.prisma.$queryRaw<{ id: string }[]>`
+      INSERT INTO "network_user_intents" (
+        id, "userId", "intent", "intent_description", metadata, "embedding", voice_file_link
+      ) VALUES (
+        gen_random_uuid(), 
+        ${userId}, 
+        ${goalTitle}, 
+        ${goalDescription}, 
+        ${metadata}::jsonb, 
+        ${vectorString}::vector, 
+        ${voiceFileLink}
+      )
+      RETURNING id;
+    `;
 
-    if (!intent) return null;
+    return new Intent(
+      result[0].id,
+      userId,
+      goalTitle,
+      goalDescription,
+      metadata,
+      new Date(),
+      undefined,
+      voiceFileLink,
+      vectorString,
+      false,
+    );
+  }
+
+  async findById(id: string): Promise<Intent | null> {
+    const result = await this.prisma.$queryRaw<any[]>`
+      SELECT id, "userId", "intent", "intent_description", metadata, voice_file_link, created_at, updated_at, "isDeleted", embedding::text
+      FROM "network_user_intents"
+      WHERE id = ${id} AND "isDeleted" = false
+    `;
+
+    if (result.length === 0) return null;
+
+    const intent = result[0];
 
     return new Intent(
       intent.id,
@@ -52,6 +95,7 @@ export class IntentRepository {
       intent.created_at,
       intent.updated_at ?? undefined,
       intent.voice_file_link,
+      intent.embedding ?? undefined,
       intent.isDeleted,
     );
   }
@@ -78,6 +122,7 @@ export class IntentRepository {
           intent.created_at,
           intent.updated_at ?? undefined,
           intent.voice_file_link,
+          undefined,
           intent.isDeleted,
         ),
     );
@@ -89,6 +134,7 @@ export class IntentRepository {
     goalDescription?: string,
     metadata?: Record<string, any>,
     voiceFileLink?: string | null,
+    vector?: number[],
   ): Promise<Intent> {
     const intent = await this.prisma.networkUserIntent.update({
       where: { id },
@@ -101,6 +147,15 @@ export class IntentRepository {
       },
     });
 
+    if (vector) {
+      const vectorString = `[${vector.join(',')}]`;
+      await this.prisma.$executeRaw`
+        UPDATE "network_user_intents"
+        SET "embedding" = ${vectorString}::vector
+        WHERE "id" = ${id};
+      `;
+    }
+
     return new Intent(
       intent.id,
       intent.userId,
@@ -110,6 +165,7 @@ export class IntentRepository {
       intent.created_at,
       intent.updated_at ?? undefined,
       intent.voice_file_link,
+      vector ? `[${vector.join(',')}]` : undefined,
       intent.isDeleted,
     );
   }

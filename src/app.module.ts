@@ -11,6 +11,7 @@ import { ContactModule } from '@api/controllers/contact/contact.module';
 import { JwtModule } from '@nestjs/jwt';
 import { StreamService } from '@application/auth/services/streamService.service';
 import { IdentitiesModule } from '@api/controllers/identities/identities.module';
+import { NetworkAnalyserModule } from '@api/controllers/network_analyser/networkAnalyser.module';
 
 
 @Module({
@@ -23,6 +24,7 @@ import { IdentitiesModule } from '@api/controllers/identities/identities.module'
     IntentModule,
     ContactModule,
     IdentitiesModule,
+    NetworkAnalyserModule,
     JwtModule.register({
       global: true,
       secret: 'sJpPXkD+5fLJfph1z0yCqQmTsk+3e0A2tZT90pJ1mU0=',
