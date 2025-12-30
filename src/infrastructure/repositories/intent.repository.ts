@@ -32,6 +32,7 @@ export class IntentRepository {
       intent.created_at,
       intent.updated_at ?? undefined,
       intent.voice_file_link,
+      undefined,
       intent.isDeleted,
     );
   }
@@ -69,16 +70,21 @@ export class IntentRepository {
       new Date(),
       undefined,
       voiceFileLink,
+      vectorString,
       false,
     );
   }
 
   async findById(id: string): Promise<Intent | null> {
-    const intent = await this.prisma.networkUserIntent.findUnique({
-      where: { id, isDeleted: false },
-    });
+    const result = await this.prisma.$queryRaw<any[]>`
+      SELECT id, "userId", "intent", "intent_description", metadata, voice_file_link, created_at, updated_at, "isDeleted", embedding::text
+      FROM "network_user_intents"
+      WHERE id = ${id} AND "isDeleted" = false
+    `;
 
-    if (!intent) return null;
+    if (result.length === 0) return null;
+
+    const intent = result[0];
 
     return new Intent(
       intent.id,
@@ -89,6 +95,7 @@ export class IntentRepository {
       intent.created_at,
       intent.updated_at ?? undefined,
       intent.voice_file_link,
+      intent.embedding ?? undefined,
       intent.isDeleted,
     );
   }
@@ -115,6 +122,7 @@ export class IntentRepository {
           intent.created_at,
           intent.updated_at ?? undefined,
           intent.voice_file_link,
+          undefined,
           intent.isDeleted,
         ),
     );
@@ -157,6 +165,7 @@ export class IntentRepository {
       intent.created_at,
       intent.updated_at ?? undefined,
       intent.voice_file_link,
+      vector ? `[${vector.join(',')}]` : undefined,
       intent.isDeleted,
     );
   }

@@ -8,7 +8,8 @@ export class IdentityService {
   constructor(private readonly repo: UserIdentityRepository, private readonly embedService: EmbedService) { }
 
   async addIdentity(userId: string, identity: Record<string, any>): Promise<UserIdentity> {
-    const embedding = await this.embedService.getEmbedding(JSON.stringify(identity));
+    const flattenJsonToEmbedding = await this.embedService.flattenJsonToEmbedding(identity);
+    const embedding = await this.embedService.getEmbedding(flattenJsonToEmbedding);
     return this.repo.create(userId, identity, embedding);
   }
 
@@ -24,7 +25,8 @@ export class IdentityService {
     };
 
     try {
-      const embedding = await this.embedService.getEmbedding(JSON.stringify(identityUpdates));
+      const flattenJsonToEmbedding = await this.embedService.flattenJsonToEmbedding(identityUpdates);
+      const embedding = await this.embedService.getEmbedding(flattenJsonToEmbedding);
       return await this.repo.update(userId, identityId, updatedIdentity, embedding);
     } catch (e) {
       throw new NotFoundException('Identity not found or access denied');
@@ -45,5 +47,9 @@ export class IdentityService {
 
   async myIdentities(userId: string): Promise<UserIdentity[]> {
     return this.repo.findByUserId(userId);
+  }
+
+  async networkAnalyser(userId: string, query: string): Promise<{ id: string, userId: string, metadata: string, distance: number }[]> {
+    return this.repo.networkAnalyser(userId, query);
   }
 }

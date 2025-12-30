@@ -20,7 +20,8 @@ export class IntentService {
     let goals = metadata;
     goals["intent"] = goalTitle;
     goals["intent_description"] = goalDescription;
-    const vector = await this.embedService.getEmbedding(JSON.stringify(goals));
+    const flattenJsonToEmbedding = await this.embedService.flattenJsonToEmbedding(goals);
+    const vector = await this.embedService.getEmbedding(flattenJsonToEmbedding);
 
     const intent = await this.intentRepository.createWithvector(
       userId,
@@ -52,7 +53,9 @@ export class IntentService {
     let goals = metadata ?? intent.metadata;
     goals["intent"] = goalTitle;
     goals["intent_description"] = goalDescription;
-    const vector = await this.embedService.getEmbedding(JSON.stringify(goals));
+
+    const flattenJsonToEmbedding = await this.embedService.flattenJsonToEmbedding(goals);
+    const vector = await this.embedService.getEmbedding(flattenJsonToEmbedding);
 
     const updatedIntent = await this.intentRepository.update(
       intentId,

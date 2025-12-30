@@ -127,4 +127,16 @@ export class UserIdentityRepository {
       throw new Error('Identity not found or access denied');
     }
   }
+
+  async networkAnalyser(userId: string, query: string): Promise<{ id: string, userId: string, metadata: string, distance: number }[]> {
+    let networs = await this.prisma.$queryRaw<{ id: string, userId: string, metadata: string, distance: number }[]>`
+          SELECT id, "userId", "identity", 
+            "embedding" <=> (${query}::vector) AS distance
+          FROM "user_identities"
+          WHERE "isDeleted" = false
+          ORDER BY distance ASC
+          LIMIT 10;
+        `;
+    return networs;
+  }
 }

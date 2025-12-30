@@ -33,4 +33,11 @@ export class EmbedService {
             throw error;
         }
     }
+
+    async flattenJsonToEmbedding(jsonToEmbed: Record<string, any>): Promise<string> {
+        const contentString = Object.entries(jsonToEmbed)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join(". ");
+        return contentString;
+    }
 }
