@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "user_contacts" ADD COLUMN     "consistencyScore" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN     "symmetryRatio" DOUBLE PRECISION NOT NULL DEFAULT 1.0;
