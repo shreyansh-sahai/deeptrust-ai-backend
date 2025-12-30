@@ -3,7 +3,7 @@ import { PrismaService } from '../database/prisma.service';
 
 @Injectable()
 export class UserContactRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async findAllByUserId(userId: string) {
     return await this.prisma.userContact.findMany({
@@ -23,6 +23,10 @@ export class UserContactRepository {
         },
       });
 
+      const [networkTypeName, networkTypeDescription] = networkType.split(':');
+      if (!networkTypeDescription) {
+        networkType = networkTypeName;
+      }
       if (!uc) {
         throw new NotFoundException(`Contact ${contactId} is not associated with user ${userId}`);
       } else if (!uc.buckets.includes(networkType)) {
@@ -41,7 +45,7 @@ export class UserContactRepository {
     // Note: Prisma updateMany with array filter for 'has' and then removal is tricky.
     // We'll fetch and update if needed, but for performance with updateMany:
     // This is better handled as: any UserContact for this user NOT in contactIds AND having networkType in buckets should have it removed.
-    
+
     const contactsToUpdate = await this.prisma.userContact.findMany({
       where: {
         userId,
@@ -64,23 +68,30 @@ export class UserContactRepository {
   }
 
   async removeFromAllBuckets(userId: string, bucketValue: string) {
-    const contactsWithBucket = await this.prisma.userContact.findMany({
+    const contacts = await this.prisma.userContact.findMany({
       where: {
         userId,
-        buckets: { has: bucketValue },
+        NOT: {
+          buckets: {
+            equals: [],
+          },
+        },
       },
       select: { id: true, buckets: true },
     });
 
-    for (const uc of contactsWithBucket) {
-      await this.prisma.userContact.update({
-        where: { id: uc.id },
-        data: {
-          buckets: {
-            set: uc.buckets.filter((b) => b !== bucketValue),
+    for (const uc of contacts) {
+      const filteredBuckets = uc.buckets.filter((b) => b.split(':')[0] !== bucketValue);
+      if (filteredBuckets.length !== uc.buckets.length) {
+        await this.prisma.userContact.update({
+          where: { id: uc.id },
+          data: {
+            buckets: {
+              set: filteredBuckets,
+            },
           },
-        },
-      });
+        });
+      }
     }
   }
 }

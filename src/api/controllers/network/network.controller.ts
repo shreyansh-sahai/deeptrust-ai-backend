@@ -31,7 +31,7 @@ import { CurrentUser } from '@common/decorators/current-user.decorator';
   version: '1',
 })
 export class NetworkController {
-  constructor(private readonly networkService: NetworkService) {}
+  constructor(private readonly networkService: NetworkService) { }
 
   @Post('save')
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -55,6 +55,7 @@ export class NetworkController {
       dto.networkType || 'custom',
       dto.networkTypeName,
       dto.isCustom,
+      dto.networkTypeDescription,
     );
   }
 
