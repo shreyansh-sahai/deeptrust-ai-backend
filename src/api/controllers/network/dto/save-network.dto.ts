@@ -30,6 +30,15 @@ export class SaveNetworkDto {
   networkTypeName: string;
 
   @ApiProperty({
+    description: 'The network type description (used if it is custom)',
+    example: 'Inner Circle for friends',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  networkTypeDescription?: string;
+
+  @ApiProperty({
     description: 'Whether it is a custom network type',
     example: false,
   })
